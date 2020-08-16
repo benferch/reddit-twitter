@@ -1,7 +1,8 @@
 require('dotenv').config();
 const sharp = require('sharp'),
 	Twit = require('twit'),
-	config = require('./config');
+	config = require('./config'),
+	fetch = require('node-fetch');
 const { colors } = require('./assets/colors');
 const {
 	utils: {
