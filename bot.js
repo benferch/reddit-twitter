@@ -1,9 +1,12 @@
 require('dotenv').config();
-const sharp = require('sharp'),
-	Twit = require('twit'),
-	config = require('./config'),
-	fetch = require('node-fetch');
+const fetch = require('node-fetch');
+const sharp = require('sharp');
+const Twit = require('twit');
+
 const { colors } = require('./assets/colors');
+const {
+	subreddits: { subs },
+} = require('./assets/subreddits');
 const {
 	utils: {
 		alphabetize,
@@ -31,16 +34,20 @@ const secret = {
 const Twitter = new Twit(secret);
 // Number of minutes between posts and updates;
 const interval = minutes(1);
-// Number of posts to return from subreddit
+// Number of posts to return
 const limit = 50;
 // Bot's twitter handle for timeline data
-const screenName = 'r_mkeyboards';
+const screenName = '_aaakash';
 // Timezone offset (for logging fetches and tweets)
 const utcOffset = +2;
 
 let queue = [];
 let timeline = [];
-
+/**
+ * Converts raw buffer data to base64 string
+ * @param {string} buffer Raw image data
+ * @returns {string}
+ */
 function base64Encode(buffer) {
 	if (buffer.byteLength > 5000000) {
 		return resize(Buffer.from(buffer, 'base64'));
@@ -48,6 +55,12 @@ function base64Encode(buffer) {
 	return new Buffer(buffer).toString('base64');
 }
 
+/**
+ * Filters the posts for images and texts that meet
+ * the posting criteria
+ * @param {array.<object>} posts An array of various subreddit posts
+ * @returns {array}
+ */
 function filterPosts(posts) {
 	let images, imgur, jpgs, pngs, texts;
 
@@ -67,6 +80,10 @@ function filterPosts(posts) {
 	return queue;
 }
 
+/**
+ * Gets the next post in the queue
+ * @returns {method}
+ */
 function getNextPost() {
 	if (queue.length) {
 		let post = queue.shift(),
@@ -76,7 +93,7 @@ function getNextPost() {
 		console.log(colors.reset, 'Attempting to post...');
 		console.log(title);
 		console.log('queue length: ', queue.length);
-
+		console.log(timeline);
 		if (!timeline.some((t) => t.text.includes(title.substring(0, 25)))) {
 			// Reset the queue after tweeting so that we're only tweeting
 			// the most upvoted, untweeted post every interval
@@ -89,8 +106,16 @@ function getNextPost() {
 	return;
 }
 
+/**
+ * Gets the top posts from the subreddits
+ * and replaces any problematic characters
+ * in the posts' title
+ * @returns {method}
+ */
 function getPosts() {
-	let url = `https://www.reddit.com/r/${config.subreddit}/top.json?limit=${limit}`;
+	let url = `https://www.reddit.com/r/${subs.join(
+		'+'
+	)}/top.json?limit=${limit}`;
 
 	// List subs in query
 	console.log(colors.yellow, 'Gathering new posts...');
@@ -105,6 +130,11 @@ function getPosts() {
 		.catch((err) => console.log(colors.red, 'Error getPosts() ', err));
 }
 
+/**
+ * Gathers post data, mutates it, then
+ * gets Twitter timeline data
+ * @returns {promise}
+ */
 function getPostsAndTimeline() {
 	// Grab our data
 	return new Promise((resolve, reject) => {
@@ -123,6 +153,10 @@ function getPostsAndTimeline() {
 	});
 }
 
+/**
+ * Returns the 200 most recent tweets from the bot account
+ * @returns {array.<object>}
+ */
 function getTimeline() {
 	return new Promise((resolve, reject) => {
 		let params = { screen_name: screenName, count: 200 };
@@ -133,6 +167,12 @@ function getTimeline() {
 	});
 }
 
+/**
+ * Resizes an image to 1000px wide so that
+ * it will be under the 5mb limit Twitter requires
+ * @param {string} buffer Raw image data
+ * @returns {string}
+ */
 function resize(buffer) {
 	return sharp(buffer)
 		.resize(1000)
@@ -141,8 +181,12 @@ function resize(buffer) {
 		.catch((err) => console.log(colors.red, 'Error resize() ', err));
 }
 
+/**
+ * Tweets a post based on it's `meta` prop
+ * @param {object} post A single post from a subreddit
+ * @returns {method}
+ */
 function tweet(post) {
-	console.log(11);
 	switch (post.data.meta) {
 		case 'text':
 			return tweetText(post);
@@ -151,6 +195,11 @@ function tweet(post) {
 	}
 }
 
+/**
+ * Tweets an update to Twitter with an image
+ * @param {object} post A post from a subreddit
+ * @returns {undefined}
+ */
 function tweetImage(post) {
 	fetch(post.data.url)
 		.then((res) => res.arrayBuffer())
@@ -198,6 +247,11 @@ function tweetImage(post) {
 		.catch((err) => console.log(colors.red, 'Error tweet() ', err));
 }
 
+/**
+ * Tweets a text-only update to Twitter
+ * @param {object} post A post from a subreddit
+ * @returns {undefined}
+ */
 function tweetText(post) {
 	let title = post.data.title,
 		params = {
@@ -214,4 +268,7 @@ function tweetText(post) {
 	});
 }
 
+// ========================================================
+// Init
+// ========================================================
 setInterval(() => getPostsAndTimeline().then(() => getNextPost()), interval);
