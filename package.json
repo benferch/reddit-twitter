@@ -1,0 +1,17 @@
+{
+	"name": "reddit-twitter",
+	"version": "1.0.0",
+	"main": "bot.js",
+	"scripts": {
+		"start": "node bot.js"
+	},
+	"repository": "git@github.com:benferch/reddit-twitter.git",
+	"author": "Ben Ferch <ben@benferch.de>",
+	"license": "MIT",
+	"dependencies": {
+		"dotenv": "^8.2.0",
+		"node-fetch": "^2.6.0",
+		"sharp": "^0.25.4",
+		"twit": "^2.2.11"
+	}
+}
