@@ -1,3 +1,4 @@
+require('polyfill-library-node');
 require('dotenv').config();
 const sharp = require('sharp'),
 	Twit = require('twit'),
