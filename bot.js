@@ -1,6 +1,4 @@
-require('polyfill-library-node');
 require('dotenv').config();
-const some = require('array.prototype.some');
 const sharp = require('sharp'),
 	Twit = require('twit'),
 	config = require('./config'),
@@ -32,7 +30,7 @@ const secret = {
 
 const Twitter = new Twit(secret);
 // Number of minutes between posts and updates;
-const interval = minutes(10);
+const interval = minutes(1);
 // Number of posts to return from subreddit
 const limit = 50;
 // Bot's twitter handle for timeline data
