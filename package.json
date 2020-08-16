@@ -9,6 +9,7 @@
 	"author": "Ben Ferch <ben@benferch.de>",
 	"license": "MIT",
 	"dependencies": {
+		"array.prototype.some": "^1.1.1",
 		"dotenv": "^8.2.0",
 		"node-fetch": "^2.6.0",
 		"polyfill-library-node": "^1.0.0",

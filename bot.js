@@ -1,5 +1,6 @@
 require('polyfill-library-node');
 require('dotenv').config();
+const some = require('array.prototype.some');
 const sharp = require('sharp'),
 	Twit = require('twit'),
 	config = require('./config'),
