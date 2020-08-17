@@ -2,7 +2,7 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 const Twit = require('twit');
-
+const config = require('./config');
 const { colors } = require('./assets/colors');
 const {
 	subreddits: { subs },
@@ -33,16 +33,18 @@ const secret = {
 
 const Twitter = new Twit(secret);
 // Number of minutes between posts and updates;
-const interval = minutes(30);
+const interval = minutes(config.interval);
 // Number of posts to return
-const limit = 50;
+const limit = config.limit;
 // Bot's twitter handle for timeline data
-const screenName = '_aaakash';
+const screenName = config.screenName;
 // Timezone offset (for logging fetches and tweets)
-const utcOffset = +2;
+const utcOffset = config.utcOffset;
 
 let queue = [];
 let timeline = [];
+
+console.log(colors.cyan, 'Next post: ', timestamp(utcOffset, interval));
 /**
  * Converts raw buffer data to base64 string
  * @param {string} buffer Raw image data
@@ -52,7 +54,7 @@ function base64Encode(buffer) {
 	if (buffer.byteLength > 5000000) {
 		return resize(Buffer.from(buffer, 'base64'));
 	}
-	return new Buffer(buffer).toString('base64');
+	return Buffer.from(buffer).toString('base64');
 }
 
 /**
@@ -99,7 +101,7 @@ function getNextPost() {
 			queue = [];
 			return tweet(post);
 		}
-		console.log('Seen it. NEXT!!!');
+		console.log('Already posted.');
 		return getNextPost();
 	}
 	return;
@@ -176,7 +178,7 @@ function resize(buffer) {
 	return sharp(buffer)
 		.resize(1000)
 		.toBuffer()
-		.then((data) => new Buffer(data).toString('base64'))
+		.then((data) => Buffer.from(data).toString('base64'))
 		.catch((err) => console.log(colors.red, 'Error resize() ', err));
 }
 
@@ -186,11 +188,22 @@ function resize(buffer) {
  * @returns {method}
  */
 function tweet(post) {
-	switch (post.data.meta) {
-		case 'text':
-			return tweetText(post);
-		case 'image':
-			return tweetImage(post);
+	if (config.text == true) {
+		switch (post.data.meta) {
+			case 'text':
+				return tweetText(post);
+			case 'image':
+				return tweetImage(post);
+		}
+	} else {
+		switch (post.data.meta) {
+			case 'text':
+				console.log(colors.green, 'Only text found, skipped.');
+				console.log(colors.cyan, 'Next post: ', timestamp(utcOffset, interval));
+				return;
+			case 'image':
+				return tweetImage(post);
+		}
 	}
 }
 
@@ -205,6 +218,7 @@ function tweetImage(post) {
 		.then(base64Encode)
 		.then((res) => {
 			let title = post.data.title;
+			let author = post.data.author;
 
 			Twitter.post('media/upload', { media_data: res }, (err, data, res) => {
 				let mediaIdStr = data.media_id_string,
@@ -216,7 +230,7 @@ function tweetImage(post) {
 				Twitter.post('media/metadata/create', meta_params, (err, data, res) => {
 					if (!err) {
 						let params = {
-							status: `${title} \n${post.data.shorty} \n#${post.data.subreddit}`,
+							status: `${title} \n/u/${author} \n \n ${post.data.shorty}`,
 							media_ids: [mediaIdStr],
 						};
 
@@ -246,28 +260,4 @@ function tweetImage(post) {
 		.catch((err) => console.log(colors.red, 'Error tweet() ', err));
 }
 
-/**
- * Tweets a text-only update to Twitter
- * @param {object} post A post from a subreddit
- * @returns {undefined}
- */
-function tweetText(post) {
-	let title = post.data.title,
-		params = {
-			status: `${title} \n#${post.data.subreddit} \n${post.data.shorty}`,
-		};
-
-	Twitter.post('statuses/update', params, (err, data, response) => {
-		console.log(colors.green, 'Post successfully tweeted!');
-		console.log(colors.green, timestamp(utcOffset));
-		console.log(colors.cyan, 'Next post: ', timestamp(utcOffset, interval));
-		console.log(' ');
-		if (err) console.log(colors.red, err);
-		if (data.errors) console.log(colors.red, data);
-	});
-}
-
-// ========================================================
-// Init
-// ========================================================
 setInterval(() => getPostsAndTimeline().then(() => getNextPost()), interval);
