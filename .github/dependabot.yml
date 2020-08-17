@@ -1,0 +1,11 @@
+ersion: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: friday
+    time: '13:00'
+    timezone: Europe/Berlin
+  assignees:
+  - benferch
