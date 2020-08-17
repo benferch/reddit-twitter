@@ -33,7 +33,7 @@ const secret = {
 
 const Twitter = new Twit(secret);
 // Number of minutes between posts and updates;
-const interval = minutes(1);
+const interval = minutes(30);
 // Number of posts to return
 const limit = 50;
 // Bot's twitter handle for timeline data
@@ -93,7 +93,6 @@ function getNextPost() {
 		console.log(colors.reset, 'Attempting to post...');
 		console.log(title);
 		console.log('queue length: ', queue.length);
-		console.log(timeline);
 		if (!timeline.some((t) => t.text.includes(title.substring(0, 25)))) {
 			// Reset the queue after tweeting so that we're only tweeting
 			// the most upvoted, untweeted post every interval
