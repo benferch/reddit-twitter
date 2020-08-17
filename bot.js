@@ -230,7 +230,7 @@ function tweetImage(post) {
 				Twitter.post('media/metadata/create', meta_params, (err, data, res) => {
 					if (!err) {
 						let params = {
-							status: `${title} \n/u/${author} \n \n ${post.data.shorty}`,
+							status: `${title} \n by /u/${author} \n \n ${post.data.shorty}`,
 							media_ids: [mediaIdStr],
 						};
 
