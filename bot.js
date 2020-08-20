@@ -77,7 +77,7 @@ function filterPosts(posts) {
 	jpgs = filterJpgs(images);
 	imgur = generateImgurUrl(filterImgur(images));
 	// Update the queue with new posts
-	queue.push(...pngs, ...jpgs, ...imgur, ...texts);
+	queue.push(...pngs, ...jpgs, ...texts);
 
 	return queue;
 }
@@ -221,6 +221,13 @@ function tweetImage(post) {
 			let author = post.data.author;
 
 			Twitter.post('media/upload', { media_data: res }, (err, data, res) => {
+				if (post.data.domain == 'imgur.com') {
+					let mediaIdStr = data.media_id_string,
+						meta_params = {
+							media_id: mediaIdStr,
+							alt_text: { text: title },
+						};
+				}
 				let mediaIdStr = data.media_id_string,
 					meta_params = {
 						media_id: mediaIdStr,
