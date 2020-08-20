@@ -5,7 +5,7 @@ This repository contains code for a Twitter bot which mirrors subreddits.
 ## Requirements
 
 - Firstly you will need a app, which you can create through [developer.twitter.com](https://developer.twitter.com/en/apps)
-  - For this you will need a developer account
+  - For this you will need a developer account, but you can easily create one, you're also prompted to create one if you click on "Create an app".
   - Click "Create an app"
   - Fill out the forms with the needed information
 - A `.env` file
