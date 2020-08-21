@@ -71,7 +71,7 @@ const utils = {
 	 * @returns {array}
 	 */
 
-	generateImgurUrl: function (posts) {
+	  generateImgurUrl: function (posts) {
 		return posts.map((p) => {
 			let id = p.data.url.split('/')[3],
 				url = p.data.url;
@@ -81,10 +81,9 @@ const utils = {
 				: `https://i.imgur.com/${id}.jpg`;
 
 			return p;
-		}); 
+		});
 
-		/*
-		generateImgurUrl: function (posts) {
+	/* generateImgurUrl: function (posts) {
 		return posts.map((p) => {
 			let id = p.data.media.oembed.thumbnail_url.split('/')[3],
 				url = p.data.media.oembed.thumbnail_url;
