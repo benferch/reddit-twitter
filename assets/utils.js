@@ -71,7 +71,7 @@ const utils = {
 	 * @returns {array}
 	 */
 
-	  generateImgurUrl: function (posts) {
+	generateImgurUrl: function (posts) {
 		return posts.map((p) => {
 			let id = p.data.url.split('/')[3],
 				url = p.data.url;
@@ -83,7 +83,7 @@ const utils = {
 			return p;
 		});
 
-	/* generateImgurUrl: function (posts) {
+		/* generateImgurUrl: function (posts) {
 		return posts.map((p) => {
 			let id = p.data.media.oembed.thumbnail_url.split('/')[3],
 				url = p.data.media.oembed.thumbnail_url;
@@ -91,8 +91,8 @@ const utils = {
 				? p.data.url
 				: `https://i.imgur.com/${id}`;
 			return p;
-		});
-	}, */
+		}); */
+	},
 	/**
 	 * Creates a shortlink to use in the tweet
 	 * @param {array.<object>} posts Posts from a subreddit
