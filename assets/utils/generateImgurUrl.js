@@ -5,7 +5,7 @@ module.exports = function generateImgurUrl(posts) {
 
 		p.data.url = url.includes('.jpg')
 			? p.data.url
-			: `https://i.imgur.com/${id}.jpg`;
+			: p.data.media.oembed.thumbnail_url.replace('?fb', '');
 
 		return p;
 	});
