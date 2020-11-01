@@ -148,7 +148,7 @@ function getTimeline() {
 
 function resize(buffer) {
 	return sharp(buffer)
-		.resize(1000)
+		.resize(1000, 1000)
 		.toBuffer()
 		.then((data) => Buffer.from(data).toString('base64'))
 		.catch((err) => {
