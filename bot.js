@@ -7,21 +7,20 @@ const { colors } = require('./assets/colors');
 const {
 	subreddits: { subs },
 } = require('./assets/subreddits');
+
 const {
-	utils: {
-		alphabetize,
-		filterImages,
-		filterImgur,
-		filterJpgs,
-		filterPngs,
-		filterTexts,
-		generateImgurUrl,
-		generateShortLinks,
-		meta,
-		minutes,
-		sanitizeTitle,
-		timestamp,
-	},
+	alphabetize,
+	filterImages,
+	filterImgur,
+	filterJpgs,
+	filterPngs,
+	filterTexts,
+	generateImgurUrl,
+	generateShortLinks,
+	meta,
+	minutes,
+	sanitizeTitle,
+	timestamp,
 } = require('./assets/utils');
 
 const secret = {
@@ -45,11 +44,7 @@ let queue = [];
 let timeline = [];
 
 console.log(colors.cyan, 'Next post: ', timestamp(utcOffset, interval));
-/**
- * Converts raw buffer data to base64 string
- * @param {string} buffer Raw image data
- * @returns {string}
- */
+
 function base64Encode(buffer) {
 	if (buffer.byteLength > 5000000) {
 		return resize(Buffer.from(buffer, 'base64'));
@@ -57,12 +52,6 @@ function base64Encode(buffer) {
 	return Buffer.from(buffer).toString('base64');
 }
 
-/**
- * Filters the posts for images and texts that meet
- * the posting criteria
- * @param {array.<object>} posts An array of various subreddit posts
- * @returns {array}
- */
 function filterPosts(posts) {
 	let images, imgur, jpgs, pngs, texts;
 
@@ -77,15 +66,11 @@ function filterPosts(posts) {
 	jpgs = filterJpgs(images);
 	imgur = generateImgurUrl(filterImgur(images));
 	// Update the queue with new posts
-	queue.push(...pngs, ...jpgs, ...texts);
+	queue.push(...pngs, ...jpgs, ...imgur, ...texts);
 
 	return queue;
 }
 
-/**
- * Gets the next post in the queue
- * @returns {method}
- */
 function getNextPost() {
 	if (queue.length) {
 		let post = queue.shift(),
@@ -107,12 +92,6 @@ function getNextPost() {
 	return;
 }
 
-/**
- * Gets the top posts from the subreddits
- * and replaces any problematic characters
- * in the posts' title
- * @returns {method}
- */
 function getPosts() {
 	let url = `https://www.reddit.com/r/${subs.join(
 		'+'
@@ -128,14 +107,14 @@ function getPosts() {
 			posts.forEach((p) => (p.data.title = sanitizeTitle(p.data.title)));
 			return posts;
 		})
-		.catch((err) => console.log(colors.red, 'Error getPosts() ', err));
+		.catch((err) => {
+			console.log(colors.red, 'Error getPosts() ', err);
+			if (config.dmErrors == true) {
+				errorDm(data);
+			}
+		});
 }
 
-/**
- * Gathers post data, mutates it, then
- * gets Twitter timeline data
- * @returns {promise}
- */
 function getPostsAndTimeline() {
 	// Grab our data
 	return new Promise((resolve, reject) => {
@@ -148,16 +127,15 @@ function getPostsAndTimeline() {
 			})
 			.then(getTimeline)
 			.then(resolve)
-			.catch((err) =>
-				console.log(colors.red, 'Error getPostsAndTimeline() ', err)
-			);
+			.catch((err) => {
+				console.log(colors.red, 'Error getPostsAndTimeline() ', err);
+				if (config.dmErrors == true) {
+					errorDm(data);
+				}
+			});
 	});
 }
 
-/**
- * Returns the 200 most recent tweets from the bot account
- * @returns {array.<object>}
- */
 function getTimeline() {
 	return new Promise((resolve, reject) => {
 		let params = { screen_name: screenName, count: 200 };
@@ -168,25 +146,44 @@ function getTimeline() {
 	});
 }
 
-/**
- * Resizes an image to 1000px wide so that
- * it will be under the 5mb limit Twitter requires
- * @param {string} buffer Raw image data
- * @returns {string}
- */
 function resize(buffer) {
 	return sharp(buffer)
 		.resize(1000)
 		.toBuffer()
 		.then((data) => Buffer.from(data).toString('base64'))
-		.catch((err) => console.log(colors.red, 'Error resize() ', err));
+		.catch((err) => {
+			console.log(colors.red, 'Error resize() ', err);
+			if (config.dmErrors == true) {
+				errorDm(data);
+			}
+		});
 }
 
-/**
- * Tweets a post based on it's `meta` prop
- * @param {object} post A single post from a subreddit
- * @returns {method}
- */
+function errorDm(error) {
+	let d = new Date();
+	let date =
+		d.getHours() +
+		':' +
+		d.getMinutes() +
+		' ' +
+		d.getDate() +
+		'.' +
+		d.getMonth() +
+		'.' +
+		d.getFullYear();
+	Twitter.post('direct_messages/events/new', {
+		event: {
+			type: 'message_create',
+			message_create: {
+				target: { recipient_id: config.admin },
+				message_data: {
+					text: date + '\n' + error,
+				},
+			},
+		},
+	});
+}
+
 function tweet(post) {
 	if (config.text == true) {
 		switch (post.data.meta) {
@@ -207,11 +204,6 @@ function tweet(post) {
 	}
 }
 
-/**
- * Tweets an update to Twitter with an image
- * @param {object} post A post from a subreddit
- * @returns {undefined}
- */
 function tweetImage(post) {
 	fetch(post.data.url)
 		.then((res) => res.arrayBuffer())
@@ -221,13 +213,13 @@ function tweetImage(post) {
 			let author = post.data.author;
 
 			Twitter.post('media/upload', { media_data: res }, (err, data, res) => {
-				if (post.data.domain == 'imgur.com') {
+				/* if (post.data.domain == 'imgur.com') {
 					let mediaIdStr = data.media_id_string,
 						meta_params = {
 							media_id: mediaIdStr,
 							alt_text: { text: title },
 						};
-				}
+				} */
 				let mediaIdStr = data.media_id_string,
 					meta_params = {
 						media_id: mediaIdStr,
@@ -237,7 +229,7 @@ function tweetImage(post) {
 				Twitter.post('media/metadata/create', meta_params, (err, data, res) => {
 					if (!err) {
 						let params = {
-							status: `${title} \n by /u/${author} \n \n ${post.data.shorty}`,
+							status: `${title} \nfrom /u/${author} \n \n ${post.data.shorty}`,
 							media_ids: [mediaIdStr],
 						};
 
@@ -250,7 +242,12 @@ function tweetImage(post) {
 								timestamp(utcOffset, interval)
 							);
 							console.log(' ');
-							if (data.errors) console.log(colors.red, data);
+							if (data.errors) {
+								console.log(colors.red, data);
+								if (config.dmErrors == true) {
+									errorDm(data);
+								}
+							}
 						});
 					} else {
 						console.log(' ');
@@ -259,12 +256,46 @@ function tweetImage(post) {
 							'There was an error when attempting to post...'
 						);
 						console.error(err);
+						if (config.dmErrors == true) {
+							errorDm(data);
+						}
 						console.log(' ');
 					}
 				});
 			});
 		})
-		.catch((err) => console.log(colors.red, 'Error tweet() ', err));
+		.catch((err) => {
+			console.log(colors.red, 'Error tweet() ', err);
+			if (config.dmErrors == true) {
+				errorDm(data);
+			}
+		});
+}
+
+function tweetText(post) {
+	let title = post.data.title,
+		params = {
+			status: `${title} \n#${post.data.subreddit} \n${post.data.shorty}`,
+		};
+
+	Twitter.post('statuses/update', params, (err, data, response) => {
+		console.log(colors.green, 'Post successfully tweeted!');
+		console.log(colors.green, timestamp(utcOffset));
+		console.log(colors.cyan, 'Next post: ', timestamp(utcOffset, interval));
+		console.log(' ');
+		if (err) {
+			console.log(colors.red, err);
+			if (config.dmErrors == true) {
+				errorDm(data);
+			}
+		}
+		if (data.errors) {
+			console.log(colors.red, data);
+			if (config.dmErrors == true) {
+				errorDm(data);
+			}
+		}
+	});
 }
 
 setInterval(() => getPostsAndTimeline().then(() => getNextPost()), interval);
