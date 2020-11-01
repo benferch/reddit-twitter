@@ -229,9 +229,15 @@ function tweetImage(post) {
 				Twitter.post('media/metadata/create', meta_params, (err, data, res) => {
 					if (!err) {
 						let params = {
-							status: `${title} \nfrom /u/${author} \n \n ${post.data.shorty}`,
+							status: `${title}\nfrom /u/${author}\n\n${post.data.shorty}`,
 							media_ids: [mediaIdStr],
 						};
+
+						if (params.status.length > 280) {
+							title = title.slice(0, 235);
+							title += '[...]';
+							params.status = `${title}\nfrom /u/${author}\n\n${post.data.shorty}`;
+						}
 
 						Twitter.post('statuses/update', params, (err, data, res) => {
 							console.log(colors.green, 'Post successfully tweeted!');
