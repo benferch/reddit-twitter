@@ -21,9 +21,7 @@ services:
   bot:
     container_name: 'bot_bot'
     hostname: 'bot'
-    image: 'node:15.5'
-    tty: true
-    stdin_open: true
+    image: 'node:14'
     working_dir: /home/node/bot
     restart: always
     ports:
@@ -35,9 +33,7 @@ services:
   backend:
     container_name: 'bot_backend'
     hostname: 'backend'
-    image: 'node:15.5'
-    tty: true
-    stdin_open: true
+    image: 'node:14'
     working_dir: /home/node/backend
     restart: always
     ports:
@@ -50,7 +46,7 @@ services:
     container_name: 'bot_frontend'
     hostname: 'frontend'
     user: 'node'
-    image: 'node:15.5'
+    image: 'node:14'
     working_dir: /home/node/frontend
     restart: always
     ports:
