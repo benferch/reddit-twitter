@@ -1,0 +1,17 @@
+$black: #121212;
+$grey: #464646;
+$light-grey: #a7a7a7;
+$white: #fbfbfb;
+$purple: #62437a;
+$lavender: #b78fd6;
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--header-background-color: #{$purple};
+	}
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--header-background-color: #{$purple};
+	}
+}
