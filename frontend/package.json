@@ -4,10 +4,14 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"start": "nodemon index.js"
+		"start": "nodemon index.js",
+		"sass": "node-sass public/css -o public/css --source-map true --watch"
 	},
 	"dependencies": {
+		"ejs": "^3.1.5",
 		"express": "^4.17.1",
+		"morgan": "^1.10.0",
+		"node-sass": "^5.0.0",
 		"nodemon": "^2.0.6"
 	}
 }
