@@ -1,6 +1,4 @@
-# Mirror Subreddits
-
-This repository contains code for a Twitter bot which mirrors subreddits.
+# Twitter Bot to mirror subreddits
 
 ## Requirements
 
@@ -12,6 +10,18 @@ This repository contains code for a Twitter bot which mirrors subreddits.
   - Copy the example.env, rename it to **.env** and fill in the needed information, you can find all the information when you click "Keys and tokens" on the page of your Twitter app
 - A `config.js` file
   - Copy the config.example.js and rename it to **config.js**, set the values as you wish
+
+## Todo
+
+- [ ] update installation
+- [ ] update requirements
+- [ ] rewrite bot with implementation of database
+
+---
+
+## Mirror Subreddits
+
+This repository contains code for a Twitter bot which mirrors subreddits.
 
 ## Installation
 
