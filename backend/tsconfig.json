@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {                 
+    "target": "es5",
+    "module": "commonjs",
+    "rootDir": ".",
+    "outDir": "./lib",
+    "strict": true,
+    "downlevelIteration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+  }
+}

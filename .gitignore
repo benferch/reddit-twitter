@@ -1,9 +1,7 @@
 .vscode
 .idea
 node_modules/
-config.js
 .env
 .env_dead
 local/
-test.js
 mongo/data
