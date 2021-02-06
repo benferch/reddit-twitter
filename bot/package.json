@@ -4,7 +4,7 @@
 	"main": "bot.js",
 	"scripts": {
 		"start": "node bot.js",
-		"stall": ""
+		"stall": "echo 0"
 	},
 	"repository": "git@github.com:benferch/reddit-twitter.git",
 	"author": "Ben Ferch <ben@benferch.de>",
