@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { response } from 'express';
 import mongoose from 'mongoose';
+import fetch from 'node-fetch';
 require('dotenv').config();
 import { config } from './config';
 const {
@@ -29,6 +30,15 @@ const PostSchema = new mongoose.Schema({
 });
 
 const Post = mongoose.model('Post', PostSchema);
+
+function getReddit() {
+	fetch(url)
+		.then((res) => res.json())
+		.then((data) => console.log(data));
+}
+setTimeout(function () {
+	getReddit();
+}, config.interval);
 
 app.get('/', (res: express.Response) => {
 	res.send('Hello World!');
