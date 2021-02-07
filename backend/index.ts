@@ -14,10 +14,12 @@ const url = `https://www.reddit.com/r/${subs.join('+')}/top.json?limit=${
 const app = express();
 
 const port = 8081;
+/* 
 mongoose.connect(
 	`mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}@localhost:27017`,
 	{ useNewUrlParser: true, useUnifiedTopology: true }
-);
+); 
+*/
 
 const PostSchema = new mongoose.Schema({
 	id: Number,
@@ -36,6 +38,7 @@ function getReddit() {
 		.then((res) => res.json())
 		.then((data) => console.log(data));
 }
+
 setTimeout(function () {
 	getReddit();
 }, config.interval);
