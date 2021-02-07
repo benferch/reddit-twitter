@@ -24,12 +24,11 @@ services:
     image: 'node:14'
     working_dir: /home/node/bot
     restart: always
-    depends_on: db
     ports:
       - 8080:8080
     volumes:
       - ./bot:/home/node/bot
-    command: 'npm stall'
+    command: 'npm run start-dev'
 
   backend:
     container_name: 'bot_backend'
@@ -43,18 +42,18 @@ services:
       - ./backend:/home/node/backend
     command: 'npm start'
 
-  frontend:
-    container_name: 'bot_frontend'
-    hostname: 'frontend'
-    user: 'node'
-    image: 'node:14'
-    working_dir: /home/node/frontend
-    restart: always
-    ports:
-      - 8082:8082
-    volumes:
-      - ./frontend:/home/node/frontend
-    command: 'npm start'
+  # frontend:
+  #   container_name: 'bot_frontend'
+  #   hostname: 'frontend'
+  #   user: 'node'
+  #   image: 'node:14'
+  #   working_dir: /home/node/frontend
+  #   restart: always
+  #   ports:
+  #     - 8082:8082
+  #   volumes:
+  #     - ./frontend:/home/node/frontend
+  #   command: 'npm start'
 
 volumes:
   mongo-container:
