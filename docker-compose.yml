@@ -23,6 +23,8 @@ services:
     hostname: 'bot'
     image: 'node:14'
     working_dir: /home/node/bot
+    depends_on:
+      - db
     restart: always
     ports:
       - 8080:8080
@@ -35,6 +37,8 @@ services:
     hostname: 'backend'
     image: 'node:14'
     working_dir: /home/node/backend
+    depends_on:
+      - db
     restart: always
     ports:
       - 8081:8081
