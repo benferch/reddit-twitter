@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import fetch from 'node-fetch';
 require('dotenv').config();
 import { config } from './config';
-import timestamp from './utils/timestamp';
+import timestamp, { yesterday } from './utils/DateFunctions';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -66,7 +66,9 @@ function getReddit() {
 							console.error(err);
 						} else {
 							if (!docs.length) {
-								Post.save().then(() => console.log('post'));
+								Post.save().then(() =>
+									console.log(`Posted Post with id ${el.data.id}`)
+								);
 							} else {
 								console.error(`Post with id ${el.data.id} exists`);
 							}
@@ -76,17 +78,39 @@ function getReddit() {
 			);
 		});
 	console.log(
-		`Next time getting posts: ${timestamp(config.utcOffset, config.interval)}`
+		`Next time getting posts: ${timestamp(
+			config.utcOffset,
+			config.requestInterval
+		)}`
 	);
 }
 
-setTimeout(() => getReddit(), config.interval);
+setTimeout(() => getReddit(), config.requestInterval);
 
 function deletePosted() {
-	
+	PostModel.find(
+		{ posted: false, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
+		(err: Error, result) => {
+			if (err) {
+				console.error(err);
+			} else {
+				result.forEach((e) => {
+					PostModel.deleteOne({ id: e.id }).then(() =>
+						console.log(`Deleted Post with id ${e.id}`)
+					);
+				});
+			}
+		}
+	);
+	console.log(
+		`Next time deleting posts: ${timestamp(
+			config.utcOffset,
+			config.deleteInterval
+		)}`
+	);
 }
 
-// setTimeout(() => deletePosted(), 86400000);
+setTimeout(() => deletePosted(), config.deleteInterval);
 
 //@ts-ignore: This is fine
 app.get('/', (req: express.Request, res: express.Response) => {
