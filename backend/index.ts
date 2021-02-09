@@ -116,7 +116,17 @@ setTimeout(() => deletePosted(), config.deleteInterval);
 app.get('/', (req: express.Request, res: express.Response) => {
 	res.status(200).json({
 		title: 'Twitter Bot Backend',
-		endpoints: [{ endpoint: '/posts', description: 'Get posts from database' }],
+		endpoints: [
+			{ endpoint: '/posts', description: 'Get posts from database' },
+			{
+				endpoint: '/getPosts',
+				description: 'Trigger getReddit() function manually to get new Posts',
+			},
+			{
+				endpoint: '/deletePosts',
+				description: 'Trigger deletePosts() function manually to delete Posts',
+			},
+		],
 	});
 });
 
