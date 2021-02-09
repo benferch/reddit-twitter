@@ -1,3 +1,9 @@
+export function yesterday() {
+	let d = new Date();
+	d.setDate(d.getDate() - 1);
+	return d;
+}
+
 export default function timestamp(offset: number, interval: number) {
 	let d = new Date();
 

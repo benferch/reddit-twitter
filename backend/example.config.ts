@@ -7,13 +7,15 @@
 
 	Properties:
 	text = Should text posts be included | default: false
-	interval = Time between requests in milliseconds | default: 1 hour
+	requestInterval = Time between requests in milliseconds | default: 1 hour (3600000) 
+	deleteInterval = Time between deletion of posts in database | default: 1 day (86400000)
 	limit = Amount of posts gathered | default: 50
 */
 
 export const config = {
 	text: false,
-	interval: 3600000,
+	requestInterval: 600,
+	deleteInterval: 86400000,
 	limit: 50,
-	utcOffset: +2,
+	utcOffset: +1,
 };
