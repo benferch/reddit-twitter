@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import fetch from 'node-fetch';
 require('dotenv').config();
 import { config } from './config';
+import timestamp from './utils/timestamp';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -60,26 +61,50 @@ function getReddit() {
 						timeAdded: Date.now(),
 						posted: false,
 					});
-					PostModel.find({ id: el.data.id }, function (err, docs) {
-						if (!docs.length) {
-							Post.save().then(() => console.log('post'));
+					PostModel.find({ id: el.data.id }, function (err: Error, docs) {
+						if (err) {
+							console.error(err);
 						} else {
-							console.error(
-								`Post with id ${el.data.id} exists \nError: ${err}`
-							);
+							if (!docs.length) {
+								Post.save().then(() => console.log('post'));
+							} else {
+								console.error(`Post with id ${el.data.id} exists`);
+							}
 						}
 					});
 				}
 			);
 		});
+	console.log(
+		`Next time getting posts: ${timestamp(config.utcOffset, config.interval)}`
+	);
 }
 
-getReddit();
+setTimeout(() => getReddit(), config.interval);
 
-// setTimeout(function () {}, config.interval);
+function deletePosted() {
+	
+}
 
-app.get('/', (res: express.Response) => {
-	res.send('Hello World!');
+// setTimeout(() => deletePosted(), 86400000);
+
+//@ts-ignore: This is fine
+app.get('/', (req: express.Request, res: express.Response) => {
+	res.status(200).json({
+		title: 'Twitter Bot Backend',
+		endpoints: [{ endpoint: '/posts', description: 'Get posts from database' }],
+	});
+});
+
+//@ts-ignore: This is fine
+app.get('/posts', (req: express.Request, res: express.Response) => {
+	PostModel.find({}, (err: Error, result) => {
+		if (err) {
+			res.status(500).send(err);
+		} else {
+			res.status(200).send(result);
+		}
+	});
 });
 
 app.listen(port, () => {
