@@ -3,8 +3,7 @@
 	"version": "1.0.0",
 	"main": "bot.js",
 	"scripts": {
-		"start": "node bot.js",
-		"start-dev": "ts-node-dev --respawn --transpile-only ./index.ts"
+		"start": "ts-node-dev --respawn --transpile-only ./index.ts"
 	},
 	"repository": "git@github.com:benferch/reddit-twitter.git",
 	"author": "Ben Ferch <ben@benferch.de>",

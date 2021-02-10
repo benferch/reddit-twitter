@@ -30,7 +30,7 @@ services:
       - 8080:8080
     volumes:
       - ./bot:/home/node/bot
-    command: 'npm run start-dev'
+    command: 'npm start'
 
   backend:
     container_name: 'bot_backend'
