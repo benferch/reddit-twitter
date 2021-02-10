@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 require('dotenv').config();
 import { config } from './config';
 import { timestamp, yesterday } from './utils/DateFunctions';
+import bodyParser from 'body-parser';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -92,7 +93,7 @@ function deletePosted() {
 				console.error(err);
 			} else {
 				result.forEach((e) => {
-					PostModel.deleteOne({ id: e.id }).then(() =>
+					PostModel.deleteOne({ id: e.id, posted: true }).then(() =>
 						console.log(`Deleted Post with id ${e.id}.`)
 					);
 				});
@@ -104,12 +105,16 @@ function deletePosted() {
 
 deletePosted();
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 //@ts-ignore: This is fine
 app.get('/', (req: express.Request, res: express.Response) => {
 	res.status(200).json({
 		title: 'Twitter Bot Backend',
 		endpoints: [
 			{ endpoint: '/posts', description: 'Get posts from database.' },
+			{ endpoint: '/updatePost', description: 'Update Post information' },
 		],
 	});
 });
@@ -123,6 +128,16 @@ app.get('/posts', (req: express.Request, res: express.Response) => {
 			res.status(200).send(result);
 		}
 	});
+});
+
+app.post('/updatePosts', (req: express.Request, res: express.Response) => {
+	if (!req.body.id) {
+		res.status(400).send('No id given');
+	} else {
+		PostModel.updateOne({ id: req.body.id }, { posted: true }).then(() =>
+			res.status(200).send(`Updated Post with id ${req.body.id}.`)
+		);
+	}
 });
 
 app.listen(port, () => {
