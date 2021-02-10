@@ -87,13 +87,13 @@ getReddit();
 function deletePosted() {
 	console.log(`Next time deleting posts: ${timestamp(config.deleteInterval)}.`);
 	PostModel.find(
-		{ posted: false, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
+		{ posted: true, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
 		(err: Error, result) => {
 			if (err) {
 				console.error(err);
 			} else {
 				result.forEach((e) => {
-					PostModel.deleteOne({ id: e.id, posted: true }).then(() =>
+					PostModel.deleteOne({ id: e.id }).then(() =>
 						console.log(`Deleted Post with id ${e.id}.`)
 					);
 				});
