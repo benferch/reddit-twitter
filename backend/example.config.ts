@@ -14,8 +14,7 @@
 
 export const config = {
 	text: false,
-	requestInterval: 600,
+	requestInterval: 3600000,
 	deleteInterval: 86400000,
 	limit: 50,
-	utcOffset: +1,
 };
