@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import fetch from 'node-fetch';
 require('dotenv').config();
 import { config } from './config';
-import timestamp, { yesterday } from './utils/DateFunctions';
+import { timestamp, yesterday } from './utils/DateFunctions';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -39,6 +39,7 @@ const PostSchema = new mongoose.Schema({
 const PostModel = mongoose.model('Post', PostSchema);
 
 function getReddit() {
+	console.log(`Next time getting posts: ${timestamp(config.requestInterval)}.`);
 	fetch(url)
 		.then((res) => res.json())
 		.then((data) => {
@@ -67,27 +68,23 @@ function getReddit() {
 						} else {
 							if (!docs.length) {
 								Post.save().then(() =>
-									console.log(`Posted Post with id ${el.data.id}`)
+									console.log(`Posted Post with id ${el.data.id}.`)
 								);
 							} else {
-								console.error(`Post with id ${el.data.id} exists`);
+								console.error(`Post with id ${el.data.id} already exists.`);
 							}
 						}
 					});
 				}
 			);
 		});
-	console.log(
-		`Next time getting posts: ${timestamp(
-			config.utcOffset,
-			config.requestInterval
-		)}`
-	);
+	setTimeout(getReddit, config.requestInterval);
 }
 
-setTimeout(() => getReddit(), config.requestInterval);
+getReddit();
 
 function deletePosted() {
+	console.log(`Next time deleting posts: ${timestamp(config.deleteInterval)}.`);
 	PostModel.find(
 		{ posted: false, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
 		(err: Error, result) => {
@@ -96,36 +93,23 @@ function deletePosted() {
 			} else {
 				result.forEach((e) => {
 					PostModel.deleteOne({ id: e.id }).then(() =>
-						console.log(`Deleted Post with id ${e.id}`)
+						console.log(`Deleted Post with id ${e.id}.`)
 					);
 				});
 			}
 		}
 	);
-	console.log(
-		`Next time deleting posts: ${timestamp(
-			config.utcOffset,
-			config.deleteInterval
-		)}`
-	);
+	setTimeout(deletePosted, config.deleteInterval);
 }
 
-setTimeout(() => deletePosted(), config.deleteInterval);
+deletePosted();
 
 //@ts-ignore: This is fine
 app.get('/', (req: express.Request, res: express.Response) => {
 	res.status(200).json({
 		title: 'Twitter Bot Backend',
 		endpoints: [
-			{ endpoint: '/posts', description: 'Get posts from database' },
-			{
-				endpoint: '/getPosts',
-				description: 'Trigger getReddit() function manually to get new Posts',
-			},
-			{
-				endpoint: '/deletePosts',
-				description: 'Trigger deletePosts() function manually to delete Posts',
-			},
+			{ endpoint: '/posts', description: 'Get posts from database.' },
 		],
 	});
 });
