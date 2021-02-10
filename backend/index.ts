@@ -69,7 +69,7 @@ function getReddit() {
 						} else {
 							if (!docs.length) {
 								Post.save().then(() =>
-									console.log(`Posted Post with id ${el.data.id}.`)
+									console.info(`Posted Post with id ${el.data.id}.`)
 								);
 							} else {
 								console.error(`Post with id ${el.data.id} already exists.`);
@@ -94,7 +94,7 @@ function deletePosted() {
 			} else {
 				result.forEach((e) => {
 					PostModel.deleteOne({ id: e.id }).then(() =>
-						console.log(`Deleted Post with id ${e.id}.`)
+						console.info(`Deleted Post with id ${e.id}.`)
 					);
 				});
 			}
@@ -141,5 +141,5 @@ app.post('/updatePosts', (req: express.Request, res: express.Response) => {
 });
 
 app.listen(port, () => {
-	console.log(`Example app listening at http://localhost:${port}`);
+	console.info(`Example app listening at http://localhost:${port}`);
 });
