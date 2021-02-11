@@ -34,6 +34,7 @@ const PostSchema = new mongoose.Schema(
 		author: String,
 		upvotes: Number,
 		imageUrl: String,
+		postUrl: String,
 		timeAdded: Date,
 		posted: Boolean,
 	},
@@ -63,6 +64,7 @@ function getReddit() {
 						author: el.data.author,
 						upvotes: el.data.ups,
 						imageUrl: el.data.url,
+						postUrl: `https://redd.it/${el.data.id}`,
 						timeAdded: Date.now(),
 						posted: false,
 					});
