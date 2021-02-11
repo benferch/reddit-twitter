@@ -27,15 +27,18 @@ mongoose.connection.on('error', (err) => {
 	console.error(err);
 });
 
-const PostSchema = new mongoose.Schema({
-	id: String,
-	title: String,
-	author: String,
-	upvotes: Number,
-	imageUrl: String,
-	timeAdded: Date,
-	posted: Boolean,
-});
+const PostSchema = new mongoose.Schema(
+	{
+		id: String,
+		title: String,
+		author: String,
+		upvotes: Number,
+		imageUrl: String,
+		timeAdded: Date,
+		posted: Boolean,
+	},
+	{ versionKey: false }
+);
 
 const PostModel = mongoose.model('Post', PostSchema);
 
@@ -122,6 +125,17 @@ app.get('/', (req: express.Request, res: express.Response) => {
 //@ts-ignore: This is fine
 app.get('/posts', (req: express.Request, res: express.Response) => {
 	PostModel.find({}, (err: Error, result) => {
+		if (err) {
+			res.status(500).send(err);
+		} else {
+			res.status(200).send(result);
+		}
+	});
+});
+
+//@ts-ignore: This is fine
+app.get('/getUnposted', (req: express.Request, res: express.Response) => {
+	PostModel.find({ posted: false }, (err: Error, result) => {
 		if (err) {
 			res.status(500).send(err);
 		} else {
