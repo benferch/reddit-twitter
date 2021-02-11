@@ -68,9 +68,9 @@ function getReddit() {
 							console.error(err);
 						} else {
 							if (!docs.length) {
-								Post.save().then(() =>
-									console.info(`Posted Post with id ${el.data.id}.`)
-								);
+								Post.save().then(() => {
+									console.info(`Posted Post with id ${el.data.id}.`);
+								});
 							} else {
 								console.error(`Post with id ${el.data.id} already exists.`);
 							}
