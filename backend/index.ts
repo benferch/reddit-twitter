@@ -72,7 +72,7 @@ function getReddit() {
 						} else {
 							if (!docs.length) {
 								Post.save().then(() => {
-									console.info(`Posted Post with id ${el.data.id}.`);
+									console.info(`Posted post with id ${el.data.id}.`);
 								});
 							} else {
 								console.error(`Post with id ${el.data.id} already exists.`);
@@ -97,7 +97,7 @@ function deletePosted() {
 			} else {
 				result.forEach((e) => {
 					PostModel.deleteOne({ id: e.id }).then(() =>
-						console.info(`Deleted Post with id ${e.id}.`)
+						console.info(`Deleted post with id ${e.id}.`)
 					);
 				});
 			}
@@ -117,7 +117,11 @@ app.get('/', (req: express.Request, res: express.Response) => {
 		title: 'Twitter Bot Backend',
 		endpoints: [
 			{ endpoint: '/posts', description: 'Get posts from database.' },
-			{ endpoint: '/updatePost', description: 'Update Post information' },
+			{ endpoint: '/updatePost', description: 'Update post information' },
+			{
+				endpoint: '/getUnposted',
+				description: 'Get unposeted posts from database',
+			},
 		],
 	});
 });
@@ -149,11 +153,11 @@ app.post('/updatePosts', (req: express.Request, res: express.Response) => {
 		res.status(400).send('No id given');
 	} else {
 		PostModel.updateOne({ id: req.body.id }, { posted: true }).then(() =>
-			res.status(200).send(`Updated Post with id ${req.body.id}.`)
+			res.status(200).send(`Updated post with id ${req.body.id}.`)
 		);
 	}
 });
 
 app.listen(port, () => {
-	console.info(`Example app listening at http://localhost:${port}`);
+	console.info(`Backend listening at http://localhost:${port}`);
 });
