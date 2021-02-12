@@ -1,6 +1,6 @@
 import { config } from './config';
 import { timestamp } from './utils/DateFunctions';
-import { createWriteStream, readFileSync } from 'fs';
+import { createWriteStream, readFileSync, unlink } from 'fs';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
 import Twit from 'twit';
@@ -13,35 +13,44 @@ const SECRET = {
 	access_token: process.env.ACCESS_TOKEN,
 	access_token_secret: process.env.ACCESS_TOKEN_SECRET,
 };
+//@ts-ignore This is fine
 const Twitter = new Twit(SECRET);
 
-async function tweet() {
-	await fetch(`${URL}getUnposted`)
+function tweet() {
+	fetch(`${URL}getUnposted`)
 		.then((res) => res.json())
-		.then(async (post) => {
+		.then((post) => {
 			let title = post[0].title;
-			const id = post[0].id,
-				author = post[0].author, // max. 27
+			const postId = post[0].id,
+				author = post[0].author,
 				imageUrl = post[0].imageUrl,
-				postUrl = post[0].postUrl; // always 22 = 49 | 280 - 49 = 231 max title length
+				postUrl = post[0].postUrl;
 			if (title.length >= 230) {
 				title = title.slice(0, title.length - 3).concat('...');
 			}
-			await fetch(imageUrl)
+			fetch(imageUrl)
 				.then((res) => {
 					const dest = createWriteStream('./img/post.png');
-					res.body.pipe(dest).on('close', () =>
-						sharp('./img/post.png')
-							.resize(1000)
-							.toFile('./img/out.png', (err, info) => {
-								if (err) {
-									console.error(err);
-								} else {
-									console.info(info);
-								}
-							})
-					);
-					const media = readFileSync('./img/out.png', { encoding: 'base64' });
+					res.body
+						.pipe(dest)
+						.on('close', () =>
+							sharp('./img/post.png')
+								.resize(1000)
+								.toFile('./img/out.png', (err, info) => {
+									if (err) {
+										console.error(err);
+									} else {
+										console.info(info);
+									}
+								})
+						)
+						.on('finish', () => {
+							dest.end();
+						});
+					//@TODO: maybe use readFile and do some magic to media/upload media_data: _media_
+					let media = readFileSync('./img/out.png', {
+						encoding: 'base64',
+					});
 					Twitter.post(
 						'media/upload',
 						{ media_data: media },
@@ -49,7 +58,7 @@ async function tweet() {
 							if (err) {
 								console.error(err);
 							} else {
-								//@ts-ignore This is ok
+								//@ts-ignore This is fine
 								let mediaIdStr = data.media_id_string,
 									meta_params = {
 										media_id: mediaIdStr,
@@ -76,7 +85,27 @@ async function tweet() {
 																config.interval
 															)}.`
 														);
-														//@TODO: post fetch to update post status
+														fetch(`${URL}updatePosts`, {
+															headers: {
+																'Content-Type': 'application/json',
+															},
+															method: 'POST',
+															body: JSON.stringify({ id: postId }),
+														}).then((data) => {
+															console.log(
+																`Successfully updated post with id ${postId}`
+															);
+														});
+														unlink('./img/post.png', (err) => {
+															if (err) {
+																console.error(err);
+															}
+														});
+														unlink('./img/out.png', (err) => {
+															if (err) {
+																console.error(err);
+															}
+														});
 													}
 												}
 											);
