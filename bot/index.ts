@@ -31,91 +31,85 @@ function tweet() {
 			fetch(imageUrl)
 				.then((res) => {
 					const dest = createWriteStream('./img/post.png');
-					res.body
-						.pipe(dest)
-						.on('close', () =>
-							sharp('./img/post.png')
-								.resize(1000)
-								.toFile('./img/out.png', (err, info) => {
-									if (err) {
-										console.error(err);
-									} else {
-										console.info(info);
-									}
-								})
-						)
-						.on('finish', () => {
-							dest.end();
-						});
-					//@TODO: maybe use readFile and do some magic to media/upload media_data: _media_
-					let media = readFileSync('./img/out.png', {
-						encoding: 'base64',
-					});
-					Twitter.post(
-						'media/upload',
-						{ media_data: media },
-						(err, data, res) => {
-							if (err) {
-								console.error(err);
-							} else {
-								//@ts-ignore This is fine
-								let mediaIdStr = data.media_id_string,
-									meta_params = {
-										media_id: mediaIdStr,
-										alt_text: { text: title },
-									};
-								Twitter.post(
-									'media/metadata/create',
-									meta_params,
-									(err, data, res) => {
-										if (!err) {
-											let params = {
-												status: `${title}\nfrom /u/${author}\n\n${postUrl}`,
-												media_ids: [mediaIdStr],
-											};
-											Twitter.post(
-												'statuses/update',
-												params,
-												(err, data, res) => {
-													if (err) {
-														console.error(err);
-													} else {
-														console.log(
-															`Post successfully tweeted\nNext time posting: ${timestamp(
-																config.interval
-															)}.`
-														);
-														fetch(`${URL}updatePosts`, {
-															headers: {
-																'Content-Type': 'application/json',
-															},
-															method: 'POST',
-															body: JSON.stringify({ id: postId }),
-														}).then((data) => {
-															console.log(
-																`Successfully updated post with id ${postId}`
+					res.body.pipe(dest).on('close', () =>
+						sharp('./img/post.png')
+							.resize(1000)
+							.toFile('./img/out.png', (err, info) => {
+								if (err) {
+									console.error(err);
+								} else {
+									console.info(info);
+									let media = readFileSync('./img/out.png', {
+										encoding: 'base64',
+									});
+									Twitter.post(
+										'media/upload',
+										{ media_data: media },
+										(err, data, res) => {
+											if (err) {
+												console.error(err);
+											} else {
+												//@ts-ignore This is fine
+												let mediaIdStr = data.media_id_string,
+													meta_params = {
+														media_id: mediaIdStr,
+														alt_text: { text: title },
+													};
+												Twitter.post(
+													'media/metadata/create',
+													meta_params,
+													(err, data, res) => {
+														if (!err) {
+															let params = {
+																status: `${title}\nfrom /u/${author}\n\n${postUrl}`,
+																media_ids: [mediaIdStr],
+															};
+															Twitter.post(
+																'statuses/update',
+																params,
+																(err, data, res) => {
+																	if (err) {
+																		console.error(err);
+																	} else {
+																		console.log(
+																			`Post successfully tweeted\nNext time posting: ${timestamp(
+																				config.interval
+																			)}.`
+																		);
+																		fetch(`${URL}updatePosts`, {
+																			headers: {
+																				'Content-Type': 'application/json',
+																			},
+																			method: 'POST',
+																			body: JSON.stringify({ id: postId }),
+																		}).then((data) => {
+																			console.log(
+																				`Successfully updated post with id ${postId}`
+																			);
+																		});
+																		unlink('./img/post.png', (err) => {
+																			if (err) {
+																				console.error(err);
+																			}
+																		});
+																		unlink('./img/out.png', (err) => {
+																			if (err) {
+																				console.error(err);
+																			}
+																		});
+																	}
+																}
 															);
-														});
-														unlink('./img/post.png', (err) => {
-															if (err) {
-																console.error(err);
-															}
-														});
-														unlink('./img/out.png', (err) => {
-															if (err) {
-																console.error(err);
-															}
-														});
+														} else {
+															console.error(err);
+														}
 													}
-												}
-											);
-										} else {
-											console.error(err);
+												);
+											}
 										}
-									}
-								);
-							}
-						}
+									);
+								}
+							})
 					);
 				})
 				.catch((err) => {
