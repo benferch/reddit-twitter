@@ -10,6 +10,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"dotenv": "^8.2.0",
+		"ffmpeg": "^0.0.4",
 		"node-fetch": "^2.6.0",
 		"sharp": "^0.25.4",
 		"twit": "^2.2.11"
@@ -17,6 +18,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.12.3",
 		"@babel/preset-env": "^7.12.1",
+		"@types/ffmpeg": "^1.0.3",
 		"@types/node": "^14.14.25",
 		"@types/node-fetch": "^2.5.8",
 		"@types/sharp": "^0.27.1",
