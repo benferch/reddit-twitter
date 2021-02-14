@@ -25,9 +25,6 @@ function tweet() {
 				author = post[0].author,
 				imageUrl = post[0].imageUrl,
 				postUrl = post[0].postUrl;
-			if (title.length >= 230) {
-				title = title.slice(0, title.length - 3).concat('...');
-			}
 			fetch(imageUrl)
 				.then((res) => {
 					const dest = createWriteStream('./img/post.png');
@@ -68,9 +65,7 @@ function tweet() {
 																'statuses/update',
 																params,
 																(err, data, res) => {
-																	if (err) {
-																		console.error(err);
-																	} else {
+																	if (!err) {
 																		console.log(
 																			`Post successfully tweeted\nNext time posting: ${timestamp(
 																				config.interval
@@ -97,6 +92,8 @@ function tweet() {
 																				console.error(err);
 																			}
 																		});
+																	} else {
+																		console.error(err);
 																	}
 																}
 															);
@@ -122,4 +119,4 @@ function tweet() {
 	setTimeout(tweet, config.interval);
 }
 
-tweet();
+// tweet();

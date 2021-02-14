@@ -1,10 +1,10 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import fetch from 'node-fetch';
-require('dotenv').config();
-import { config } from './config';
-import { timestamp, yesterday } from './utils/DateFunctions';
 import bodyParser from 'body-parser';
+import { config } from './config';
+import express from 'express';
+import { timestamp, yesterday } from './utils/DateFunctions';
+require('dotenv').config();
+import mongoose from 'mongoose';
+import fetch, { Headers } from 'node-fetch';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -56,14 +56,56 @@ function getReddit() {
 						author: String;
 						ups: Number;
 						url: String;
+						secure_media: {
+							reddit_video: {
+								fallback_url: String;
+							};
+						};
 					};
 				}) => {
+					let title = el.data.title;
+					if (el.data.title.length >= 230) {
+						title = title.slice(0, title.length - 3).concat('...');
+					}
+					let imageUrl = el.data.url;
+					if (imageUrl.includes('https://imgur.com/')) {
+						if (imageUrl.includes('https://imgur.com/a/')) {
+							let ID = imageUrl.split('/')[4];
+							fetch(`https://api.imgur.com/3/album/${ID}/images`, {
+								method: 'GET',
+								headers: new Headers({
+									Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+								}),
+							})
+								.then((res) => res.json())
+								.then((data) => {
+									imageUrl = data.data[0].link;
+								});
+						} else {
+							let ID = imageUrl.split('/')[3];
+							fetch(`https://api.imgur.com/3/image/${ID}`, {
+								method: 'GET',
+								headers: new Headers({
+									Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+								}),
+							})
+								.then((res) => res.json())
+								.then((data) => {
+									imageUrl = data.data.link;
+								});
+						}
+					} else if (imageUrl.includes('https://v.redd.it/')) {
+						let fb_url = el.data.secure_media.reddit_video.fallback_url;
+						fb_url = fb_url.replace('?source=fallback', '');
+						console.log(fb_url);
+						imageUrl = fb_url;
+					}
 					const Post = new PostModel({
 						id: el.data.id,
-						title: el.data.title,
+						title: title,
 						author: el.data.author,
 						upvotes: el.data.ups,
-						imageUrl: el.data.url,
+						imageUrl: imageUrl,
 						postUrl: `https://redd.it/${el.data.id}`,
 						timeAdded: Date.now(),
 						posted: false,
