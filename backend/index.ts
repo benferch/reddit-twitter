@@ -5,6 +5,8 @@ import { timestamp, yesterday } from './utils/DateFunctions';
 require('dotenv').config();
 import mongoose from 'mongoose';
 import fetch, { Headers } from 'node-fetch';
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
 const {
 	subreddits: { subs },
 } = require('./subreddits');
@@ -15,6 +17,27 @@ const url = `https://www.reddit.com/r/${subs.join('+')}/top.json?limit=${
 
 const app = express();
 const port = 8081;
+
+Sentry.init({
+	dsn: process.env.SENTRY_DSN,
+
+	// We recommend adjusting this value in production, or using tracesSampler
+	// for finer control
+	tracesSampleRate: 1.0,
+	integrations: [new Tracing.Integrations.Mongo()],
+	environment: 'development',
+});
+
+const transaction = Sentry.startTransaction({
+	op: 'Get posts and store',
+	name: 'Get posts from reddit and store them in the database',
+});
+
+Sentry.setUser({ email: process.env.SENTRY_MAIL });
+
+Sentry.configureScope((scope) => {
+	scope.setSpan(transaction);
+});
 
 mongoose
 	.connect(
@@ -44,89 +67,113 @@ const PostSchema = new mongoose.Schema(
 const PostModel = mongoose.model('Post', PostSchema);
 
 function getReddit() {
-	console.log(`Next time getting posts: ${timestamp(config.requestInterval)}.`);
-	fetch(url)
-		.then((res) => res.json())
-		.then((data) => {
-			data.data.children.forEach(
-				(el: {
-					data: {
-						id: String;
-						title: String;
-						author: String;
-						ups: Number;
-						url: String;
-						secure_media: {
-							reddit_video: {
-								fallback_url: String;
+	try {
+		console.log(
+			`Next time getting posts: ${timestamp(config.requestInterval)}.`
+		);
+		fetch(url)
+			.then((res) => res.json())
+			.then((data) => {
+				data.data.children.forEach(
+					(el: {
+						data: {
+							id: String;
+							title: String;
+							author: String;
+							selftext: String;
+							ups: Number;
+							url: String;
+							secure_media: {
+								reddit_video: {
+									fallback_url: String;
+								};
 							};
 						};
-					};
-				}) => {
-					let title = el.data.title;
-					if (el.data.title.length >= 230) {
-						title = title.slice(0, title.length - 3).concat('...');
-					}
-					let imageUrl = el.data.url;
-					if (imageUrl.includes('https://imgur.com/')) {
-						if (imageUrl.includes('https://imgur.com/a/')) {
-							let ID = imageUrl.split('/')[4];
-							fetch(`https://api.imgur.com/3/album/${ID}/images`, {
-								method: 'GET',
-								headers: new Headers({
-									Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-								}),
-							})
-								.then((res) => res.json())
-								.then((data) => {
-									imageUrl = data.data[0].link;
+					}) => {
+						if (el.data.selftext === '') {
+							let title = el.data.title;
+							if (el.data.title.length >= 230) {
+								title = title.slice(0, title.length - 3).concat('...');
+							}
+							let imageUrl = el.data.url;
+							if (imageUrl.includes('https://imgur.com/')) {
+								if (imageUrl.includes('https://imgur.com/a/')) {
+									let ID = imageUrl.split('/')[4];
+									fetch(`https://api.imgur.com/3/album/${ID}/images`, {
+										method: 'GET',
+										headers: new Headers({
+											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+										}),
+									})
+										.then((res) => res.json())
+										.then((data) => {
+											imageUrl = data.data[0].link;
+										});
+								} else if (imageUrl.includes('https://imgur.com/gallery')) {
+									let ID = imageUrl.split('/')[4];
+									fetch(`https://api.imgur.com/3/gallery/album/${ID}`, {
+										method: 'GET',
+										headers: new Headers({
+											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+										}),
+									})
+										.then((res) => res.json())
+										.then((data) => {
+											imageUrl = data.data.images[0].link;
+										});
+								} else if (
+									!imageUrl.endsWith('.png') ||
+									!imageUrl.endsWith('.jpg')
+								) {
+									let ID = imageUrl.split('/')[3];
+									fetch(`https://api.imgur.com/3/image/${ID}`, {
+										method: 'GET',
+										headers: new Headers({
+											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+										}),
+									})
+										.then((res) => res.json())
+										.then((data) => {
+											imageUrl = data.data.link;
+										});
+								}
+							} else if (!imageUrl.includes('https://v.redd.it/')) {
+								const Post = new PostModel({
+									id: el.data.id,
+									title: title,
+									author: el.data.author,
+									upvotes: el.data.ups,
+									imageUrl: imageUrl,
+									postUrl: `https://redd.it/${el.data.id}`,
+									timeAdded: Date.now(),
+									posted: false,
 								});
-						} else {
-							let ID = imageUrl.split('/')[3];
-							fetch(`https://api.imgur.com/3/image/${ID}`, {
-								method: 'GET',
-								headers: new Headers({
-									Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-								}),
-							})
-								.then((res) => res.json())
-								.then((data) => {
-									imageUrl = data.data.link;
+								PostModel.find({ id: el.data.id }, function (err: Error, docs) {
+									if (err) {
+										console.error(err);
+									} else {
+										if (!docs.length) {
+											Post.save().then(() => {
+												console.info(`Posted post with id ${el.data.id}.`);
+											});
+										} else {
+											console.error(
+												`Post with id ${el.data.id} already exists.`
+											);
+										}
+									}
 								});
-						}
-					} else if (imageUrl.includes('https://v.redd.it/')) {
-						let fb_url = el.data.secure_media.reddit_video.fallback_url;
-						fb_url = fb_url.replace('?source=fallback', '');
-						console.log(fb_url);
-						imageUrl = fb_url;
-					}
-					const Post = new PostModel({
-						id: el.data.id,
-						title: title,
-						author: el.data.author,
-						upvotes: el.data.ups,
-						imageUrl: imageUrl,
-						postUrl: `https://redd.it/${el.data.id}`,
-						timeAdded: Date.now(),
-						posted: false,
-					});
-					PostModel.find({ id: el.data.id }, function (err: Error, docs) {
-						if (err) {
-							console.error(err);
-						} else {
-							if (!docs.length) {
-								Post.save().then(() => {
-									console.info(`Posted post with id ${el.data.id}.`);
-								});
-							} else {
-								console.error(`Post with id ${el.data.id} already exists.`);
 							}
 						}
-					});
-				}
-			);
-		});
-	setTimeout(getReddit, config.requestInterval);
+					}
+				);
+			});
+		setTimeout(getReddit, config.requestInterval);
+	} catch (err) {
+		Sentry.captureException(err);
+	} finally {
+		transaction.finish();
+	}
 }
 
 getReddit();
