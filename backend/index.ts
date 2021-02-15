@@ -90,52 +90,42 @@ function getReddit() {
 							};
 						};
 					}) => {
-						if (el.data.selftext === '') {
+						if (
+							el.data.selftext === '' &&
+							!el.data.url.includes('https://youtu.be')
+						) {
 							let title = el.data.title;
 							if (el.data.title.length >= 230) {
 								title = title.slice(0, title.length - 3).concat('...');
 							}
 							let imageUrl = el.data.url;
 							if (imageUrl.includes('https://imgur.com/')) {
-								if (imageUrl.includes('https://imgur.com/a/')) {
-									let ID = imageUrl.split('/')[4];
-									fetch(`https://api.imgur.com/3/album/${ID}/images`, {
-										method: 'GET',
-										headers: new Headers({
-											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-										}),
-									})
-										.then((res) => res.json())
-										.then((data) => {
-											imageUrl = data.data[0].link;
-										});
-								} else if (imageUrl.includes('https://imgur.com/gallery')) {
-									let ID = imageUrl.split('/')[4];
-									fetch(`https://api.imgur.com/3/gallery/album/${ID}`, {
-										method: 'GET',
-										headers: new Headers({
-											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-										}),
-									})
-										.then((res) => res.json())
-										.then((data) => {
-											imageUrl = data.data.images[0].link;
-										});
-								} else if (
-									!imageUrl.endsWith('.png') ||
-									!imageUrl.endsWith('.jpg')
-								) {
-									let ID = imageUrl.split('/')[3];
-									fetch(`https://api.imgur.com/3/image/${ID}`, {
-										method: 'GET',
-										headers: new Headers({
-											Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-										}),
-									})
-										.then((res) => res.json())
-										.then((data) => {
-											imageUrl = data.data.link;
-										});
+								if (!imageUrl.endsWith('.png') || !imageUrl.endsWith('.jpg')) {
+									if (imageUrl.includes('https://imgur.com/a/')) {
+										let ID = imageUrl.split('/')[4];
+										fetch(`https://api.imgur.com/3/album/${ID}/images`, {
+											method: 'GET',
+											headers: new Headers({
+												Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+											}),
+										})
+											.then((res) => res.json())
+											.then((data) => {
+												imageUrl = data.data[0].link;
+											});
+									} else if (imageUrl.includes('https://imgur.com/gallery')) {
+										let ID = imageUrl.split('/')[4];
+										fetch(`https://api.imgur.com/3/gallery/album/${ID}`, {
+											method: 'GET',
+											headers: new Headers({
+												Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+											}),
+										})
+											.then((res) => res.json())
+											.then((data) => {
+												imageUrl = data.data.images[0].link;
+											});
+									}
 								}
 							} else if (!imageUrl.includes('https://v.redd.it/')) {
 								const Post = new PostModel({
@@ -168,12 +158,12 @@ function getReddit() {
 					}
 				);
 			});
-		setTimeout(getReddit, config.requestInterval);
 	} catch (err) {
 		Sentry.captureException(err);
 	} finally {
 		transaction.finish();
 	}
+	setTimeout(getReddit, config.requestInterval);
 }
 
 getReddit();
