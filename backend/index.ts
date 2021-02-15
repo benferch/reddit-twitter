@@ -25,7 +25,7 @@ Sentry.init({
 	// for finer control
 	tracesSampleRate: 1.0,
 	integrations: [new Tracing.Integrations.Mongo()],
-	environment: 'development',
+	environment: process.env.ENV,
 });
 
 const transaction = Sentry.startTransaction({

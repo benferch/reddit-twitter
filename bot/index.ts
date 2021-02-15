@@ -22,7 +22,7 @@ Sentry.init({
 	// We recommend adjusting this value in production, or using tracesSampler
 	// for finer control
 	tracesSampleRate: 1.0,
-	environment: 'development',
+	environment: process.env.ENV,
 });
 
 Sentry.setUser({ email: process.env.SENTRY_MAIL });
