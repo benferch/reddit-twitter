@@ -7,6 +7,8 @@
 		"start": "ts-node-dev --respawn --transpile-only ./index.ts"
 	},
 	"dependencies": {
+		"@sentry/node": "^6.1.0",
+		"@sentry/tracing": "^6.1.0",
 		"body-parser": "^1.19.0",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",

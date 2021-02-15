@@ -27,6 +27,7 @@ function tweet() {
 				postUrl = post[0].postUrl;
 			fetch(imageUrl)
 				.then((res) => {
+					// Twitter video size: 2min 20 sec && 512mb && max res 1920x1200
 					const dest = createWriteStream('./img/post.png');
 					res.body.pipe(dest).on('close', () =>
 						sharp('./img/post.png')
