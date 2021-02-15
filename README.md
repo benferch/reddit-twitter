@@ -6,22 +6,10 @@
   - For this you will need a developer account, but you can easily create one, you're also prompted to create one if you click on "Create an app".
   - Click "Create an app"
   - Fill out the forms with the needed information
-- A `.env` file
-  - Copy the example.env, rename it to **.env** and fill in the needed information, you can find all the information when you click "Keys and tokens" on the page of your Twitter app
-- A `config.js` file
+- A `.env` file in the bot **and** backend directory
+  - Copy the example.env, rename it to **.env** and fill in the needed information, you can find all the information when you click "Keys and tokens" on the page of your Twitter app. You'll need access to the IMGUR API, follow [this](https://apidocs.imgur.com/#intro) guide to get access.
+- A `config.js` file in the bot **and** backend directory
   - Copy the config.example.js and rename it to **config.js**, set the values as you wish
-
-## Todo
-
-- [ ] update installation
-- [ ] update requirements
-- [ ] rewrite bot with implementation of database
-
----
-
-## Mirror Subreddits
-
-This repository contains code for a Twitter bot which mirrors subreddits.
 
 ## Installation
 
@@ -29,7 +17,7 @@ This repository contains code for a Twitter bot which mirrors subreddits.
 
 ```sh
 git clone git@github.com:benferch/reddit-twitter.git
-> cd into the directory, where the bot is
+# cd into the directory, where the bot is and run the following command in the bot and backend folder
 yarn
 ```
 
@@ -37,7 +25,7 @@ yarn
 
 ```sh
 git clone https://github.com/benferch/reddit-twitter.git
-> cd into the directory, where the bot is
+# cd into the directory, where the bot is and run the following command in the bot and backend folder
 yarn
 ```
 
@@ -46,7 +34,7 @@ yarn
 To start the bot simply run
 
 ```sh
-yarn start
+docker-compose up
 ```
 
 ## Issues
