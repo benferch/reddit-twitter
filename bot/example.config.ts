@@ -3,15 +3,12 @@
 
 	------
 
-	This is the config of the backend
+	This is the config of the bot
 
 	Properties:
-	text = Should text posts be included | default: false
-	requestInterval = Time between requests in milliseconds | default: 1 hour (3600000) 
-	deleteInterval = Time between deletion of posts in database | default: 1 day (86400000)
-	limit = Amount of posts gathered | default: 50
+	interval = Time between requests in milliseconds | default: 1 hour (3600000) 
 */
 
 export const config = {
-  
+	interval: 3600000,
 };
