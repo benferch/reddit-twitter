@@ -149,4 +149,4 @@ function tweet() {
 	setTimeout(tweet, config.interval);
 }
 
-// tweet();
+tweet();
