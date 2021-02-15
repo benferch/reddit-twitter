@@ -158,12 +158,12 @@ function getReddit() {
 					}
 				);
 			});
+		setTimeout(getReddit, config.requestInterval);
 	} catch (err) {
 		Sentry.captureException(err);
 	} finally {
 		transaction.finish();
 	}
-	setTimeout(getReddit, config.requestInterval);
 }
 
 getReddit();

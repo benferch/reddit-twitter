@@ -141,12 +141,12 @@ function tweet() {
 			.catch((err) => {
 				console.error(err);
 			});
+		setTimeout(tweet, config.interval);
 	} catch (err) {
 		Sentry.captureException(err);
 	} finally {
 		transaction.finish();
 	}
-	setTimeout(tweet, config.interval);
 }
 
 tweet();
