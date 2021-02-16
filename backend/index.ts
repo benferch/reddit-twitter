@@ -94,17 +94,24 @@ function getReddit() {
 						};
 					}) => {
 						if (
-							el.data.selftext === '' &&
-							!el.data.url.includes('https://youtu.be')
+							el.data.selftext === '' ||
+							!el.data.url.includes('https://youtu.be') ||
+							!el.data.url.includes('https://www.youtu.be')
 						) {
 							let title = el.data.title;
 							if (el.data.title.length >= 230) {
 								title = title.slice(0, title.length - 3).concat('...');
 							}
 							let imageUrl = el.data.url;
-							if (imageUrl.includes('https://imgur.com/')) {
+							if (
+								imageUrl.includes('https://imgur.com/') ||
+								imageUrl.includes('https://www.imgur.com/')
+							) {
 								if (!imageUrl.endsWith('.png') || !imageUrl.endsWith('.jpg')) {
-									if (imageUrl.includes('https://imgur.com/a/')) {
+									if (
+										imageUrl.includes('https://imgur.com/a/') ||
+										imageUrl.includes('https://www.imgur.com/a/')
+									) {
 										let ID = imageUrl.split('/')[4];
 										fetch(`https://api.imgur.com/3/album/${ID}/images`, {
 											method: 'GET',
@@ -116,7 +123,10 @@ function getReddit() {
 											.then((data) => {
 												imageUrl = data.data[0].link;
 											});
-									} else if (imageUrl.includes('https://imgur.com/gallery')) {
+									} else if (
+										imageUrl.includes('https://imgur.com/gallery') ||
+										imageUrl.includes('https://www.imgur.com/gallery')
+									) {
 										let ID = imageUrl.split('/')[4];
 										fetch(`https://api.imgur.com/3/gallery/album/${ID}`, {
 											method: 'GET',
