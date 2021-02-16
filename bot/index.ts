@@ -25,6 +25,8 @@ Sentry.init({
 	environment: process.env.ENV,
 });
 
+sharp.cache(false);
+
 Sentry.setUser({ email: process.env.SENTRY_MAIL });
 
 const transaction = Sentry.startTransaction({
@@ -45,7 +47,7 @@ function tweet() {
 			.then((res) => res.json())
 			.then((post) => {
 				let title = post[0].title;
-				const postId = post[0].id,
+				let postId = post[0].id,
 					author = post[0].author,
 					imageUrl = post[0].imageUrl,
 					postUrl = post[0].postUrl;
@@ -106,16 +108,16 @@ function tweet() {
 																				console.log(
 																					`Successfully updated post with id ${postId}`
 																				);
-																			});
-																			unlink('./img/post.png', (err) => {
-																				if (err) {
-																					console.error(err);
-																				}
-																			});
-																			unlink('./img/out.png', (err) => {
-																				if (err) {
-																					console.error(err);
-																				}
+																				unlink('./img/post.png', (err) => {
+																					if (err) {
+																						console.error(err);
+																					}
+																				});
+																				unlink('./img/out.png', (err) => {
+																					if (err) {
+																						console.error(err);
+																					}
+																				});
 																			});
 																		} else {
 																			console.error(err);

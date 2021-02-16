@@ -52,7 +52,10 @@ mongoose.connection.on('error', (err) => {
 
 const PostSchema = new mongoose.Schema(
 	{
-		id: String,
+		id: {
+			type: String,
+			unique: true,
+		},
 		title: String,
 		author: String,
 		upvotes: Number,
