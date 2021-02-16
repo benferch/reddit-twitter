@@ -57,7 +57,7 @@ services:
   #     - 8082:8082
   #   volumes:
   #     - ./frontend:/home/node/frontend
-  #   command: 'npm start'
+  #   command: 'npm run dev'
 
 volumes:
   mongo-container:
