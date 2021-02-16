@@ -94,9 +94,9 @@ function getReddit() {
 						};
 					}) => {
 						if (
-							el.data.selftext === '' ||
-							!el.data.url.includes('https://youtu.be') ||
-							!el.data.url.includes('https://www.youtu.be')
+							(el.data.selftext === '' && el.data.url.endsWith('.png')) ||
+							el.data.url.endsWith('.jpg') ||
+							el.data.url.endsWith('.gif')
 						) {
 							let title = el.data.title;
 							if (el.data.title.length >= 230) {
