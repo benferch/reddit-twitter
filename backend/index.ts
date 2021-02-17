@@ -93,12 +93,8 @@ function getReddit() {
 							};
 						};
 					}) => {
-						if (
-							(el.data.selftext === '' && el.data.url.endsWith('.png')) ||
-							el.data.url.endsWith('.jpg') ||
-							el.data.url.endsWith('.gif')
-						) {
-							let title = el.data.title;
+						if (el.data.selftext === '') {
+							let title = el.data.title.replace('&amp;', '&');
 							if (el.data.title.length >= 230) {
 								title = title.slice(0, title.length - 3).concat('...');
 							}
@@ -140,7 +136,12 @@ function getReddit() {
 											});
 									}
 								}
-							} else if (!imageUrl.includes('https://v.redd.it/')) {
+							} else if (
+								(!imageUrl.includes('https://v.redd.it/') &&
+									el.data.url.endsWith('.png')) ||
+								el.data.url.endsWith('.jpg') ||
+								el.data.url.endsWith('.gif')
+							) {
 								const Post = new PostModel({
 									id: el.data.id,
 									title: title,
