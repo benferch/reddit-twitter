@@ -1,4 +1,4 @@
-# Twitter Bot to mirror subreddits
+# Bot to mirror subreddits
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/r_mkeyboards)](https://twitter.com/r_mkeyboards)
 
