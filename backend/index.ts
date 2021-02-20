@@ -28,15 +28,21 @@ Sentry.init({
 	environment: process.env.ENV,
 });
 
-const transaction = Sentry.startTransaction({
+const getTransaction = Sentry.startTransaction({
 	op: 'Get posts and store',
 	name: 'Get posts from reddit and store them in the database',
+});
+
+const delTransaction = Sentry.startTransaction({
+	op: 'Delete posts',
+	name: 'Delte posted posts from database which are older than 24 hours',
 });
 
 Sentry.setUser({ email: process.env.SENTRY_MAIL });
 
 Sentry.configureScope((scope) => {
-	scope.setSpan(transaction);
+	scope.setSpan(getTransaction);
+	scope.setSpan(delTransaction);
 });
 
 mongoose
@@ -177,29 +183,37 @@ function getReddit() {
 	} catch (err) {
 		Sentry.captureException(err);
 	} finally {
-		transaction.finish();
+		getTransaction.finish();
 	}
 }
 
 getReddit();
 
 function deletePosted() {
-	console.log(`Next time deleting posts: ${timestamp(config.deleteInterval)}.`);
-	PostModel.find(
-		{ posted: true, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
-		(err: Error, result) => {
-			if (err) {
-				console.error(err);
-			} else {
-				result.forEach((e) => {
-					PostModel.deleteOne({ id: e.id }).then(() =>
-						console.info(`Deleted post with id ${e.id}.`)
-					);
-				});
+	try {
+		console.log(
+			`Next time deleting posts: ${timestamp(config.deleteInterval)}.`
+		);
+		PostModel.find(
+			{ posted: true, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
+			(err: Error, result) => {
+				if (err) {
+					console.error(err);
+				} else {
+					result.forEach((e) => {
+						PostModel.deleteOne({ id: e.id }).then(() =>
+							console.info(`Deleted post with id ${e.id}.`)
+						);
+					});
+				}
 			}
-		}
-	);
-	setTimeout(deletePosted, config.deleteInterval);
+		);
+		setTimeout(deletePosted, config.deleteInterval);
+	} catch (err) {
+		Sentry.captureException(err);
+	} finally {
+		delTransaction.finish();
+	}
 }
 
 deletePosted();
