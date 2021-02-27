@@ -3,7 +3,6 @@ import { timestamp } from './utils/DateFunctions';
 import { createWriteStream, readFileSync, unlink } from 'fs';
 import fetch from 'node-fetch';
 import * as Sentry from '@sentry/node';
-import * as Tracing from '@sentry/tracing';
 import sharp from 'sharp';
 import Twit from 'twit';
 require('dotenv').config();
@@ -69,7 +68,7 @@ function tweet() {
 										Twitter.post(
 											'media/upload',
 											{ media_data: media },
-											(err, data, res) => {
+											(err, data, _res) => {
 												if (err) {
 													console.error(err);
 												} else {
@@ -82,7 +81,7 @@ function tweet() {
 													Twitter.post(
 														'media/metadata/create',
 														meta_params,
-														(err, data, res) => {
+														(err, _data, _res) => {
 															if (!err) {
 																let params = {
 																	status: `${title}\nfrom /u/${author}\n\n${postUrl}`,
@@ -91,7 +90,7 @@ function tweet() {
 																Twitter.post(
 																	'statuses/update',
 																	params,
-																	(err, data, res) => {
+																	(err, _data, _res) => {
 																		if (!err) {
 																			console.log(
 																				`Post successfully tweeted\nNext time posting: ${timestamp(
@@ -104,7 +103,7 @@ function tweet() {
 																				},
 																				method: 'POST',
 																				body: JSON.stringify({ id: postId }),
-																			}).then((data) => {
+																			}).then((_data) => {
 																				console.log(
 																					`Successfully updated post with id ${postId}`
 																				);
