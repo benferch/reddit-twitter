@@ -22,7 +22,7 @@
 - Clone the repository
 - run `yarn` in the bot **and** backend directory
 
-## Start the bot
+## Usage
 
 To start the bot simply run
 
