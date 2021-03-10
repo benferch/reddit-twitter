@@ -35,7 +35,7 @@ const getTransaction = Sentry.startTransaction({
 
 const delTransaction = Sentry.startTransaction({
 	op: 'Delete posts',
-	name: 'Delte posted posts from database which are older than 24 hours',
+	name: 'Delete posted posts from database which are older than 24 hours',
 });
 
 Sentry.setUser({ email: process.env.SENTRY_MAIL });
@@ -102,7 +102,7 @@ function getReddit() {
 						if (el.data.selftext === '') {
 							let title = el.data.title.replace('&amp;', '&');
 							if (el.data.title.length >= 230) {
-								length = 230;
+								const length = 230;
 								title = title.slice(0, length - 3).concat('...');
 							}
 							let imageUrl = el.data.url;
