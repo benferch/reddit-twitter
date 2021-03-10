@@ -1,5 +1,9 @@
 # Bot to mirror subreddits
 
+[![Twitter Follow](https://img.shields.io/twitter/follow/r_mkeyboards)](https://twitter.com/r_mkeyboards)
+
+---
+
 ## Requirements
 
 - Firstly you will need a app, which you can create through [developer.twitter.com](https://developer.twitter.com/en/apps)
@@ -18,7 +22,7 @@
 - Clone the repository
 - run `yarn` in the bot **and** backend directory
 
-## Start the bot
+## Usage
 
 To start the bot simply run
 
