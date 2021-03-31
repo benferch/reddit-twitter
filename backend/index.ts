@@ -101,8 +101,8 @@ function getReddit() {
 					}) => {
 						if (el.data.selftext === '') {
 							let title = el.data.title.replace('&amp;', '&');
-							if (el.data.title.length >= 230) {
-								const length = 230;
+							if (el.data.title.length >= 180) {
+								const length = 180;
 								title = title.slice(0, length - 3).concat('...');
 							}
 							let imageUrl = el.data.url;
