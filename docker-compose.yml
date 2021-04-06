@@ -18,24 +18,11 @@ services:
       - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - ./mongo/data:/data/db
 
-  bot:
-    container_name: 'bot_bot'
-    hostname: 'bot'
-    image: 'node:14'
-    working_dir: /home/node/bot
-    depends_on:
-      - backend
-    restart: always
-    ports:
-      - 8080:8080
-    volumes:
-      - ./bot:/home/node/bot
-    command: 'npm start'
-
   backend:
     container_name: 'bot_backend'
     hostname: 'backend'
     image: 'node:14'
+    command: 'yarn workspace backend start'
     working_dir: /home/node/backend
     depends_on:
       - db
@@ -43,8 +30,21 @@ services:
     ports:
       - 8081:8081
     volumes:
-      - ./backend:/home/node/backend
-    command: 'npm start'
+      - .:/home/node/backend
+
+  bot:
+    container_name: 'bot_bot'
+    hostname: 'bot'
+    image: 'node:14'
+    command: 'yarn workspace bot start'
+    working_dir: /home/node/bot
+    depends_on:
+      - backend
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/home/node/bot
 
 volumes:
   mongo-container:

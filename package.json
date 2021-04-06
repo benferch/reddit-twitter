@@ -1,0 +1,8 @@
+{
+	"name": "reddit-twitter",
+	"private": true,
+	"workspaces": [
+		"backend",
+		"bot"
+	]
+}

@@ -20,7 +20,7 @@
 ## Installation
 
 - Clone the repository
-- run `yarn` in the bot **and** backend directory
+- run `yarn` in the root directory
 
 ## Usage
 

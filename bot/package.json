@@ -1,7 +1,7 @@
 {
-	"name": "reddit-twitter",
+	"name": "bot",
 	"version": "1.0.0",
-	"main": "bot.js",
+	"main": "index.ts",
 	"scripts": {
 		"start": "ts-node-dev --respawn --transpile-only ./index.ts"
 	},
