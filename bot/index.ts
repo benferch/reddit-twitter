@@ -5,7 +5,6 @@ import fetch from 'node-fetch';
 import * as Sentry from '@sentry/node';
 import sharp from 'sharp';
 import Twit from 'twit';
-require('dotenv').config();
 
 const URL = 'http://backend:8081/';
 const SECRET = {
@@ -21,7 +20,7 @@ Sentry.init({
 	// We recommend adjusting this value in production, or using tracesSampler
 	// for finer control
 	tracesSampleRate: 1.0,
-	environment: process.env.ENV,
+	environment: process.env.SENTRY_ENV,
 });
 
 sharp.cache(false);

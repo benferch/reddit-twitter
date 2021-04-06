@@ -2,7 +2,6 @@ import bodyParser from 'body-parser';
 import { config } from './config';
 import express from 'express';
 import { timestamp, yesterday } from './utils/DateFunctions';
-require('dotenv').config();
 import mongoose from 'mongoose';
 import fetch, { Headers } from 'node-fetch';
 import * as Sentry from '@sentry/node';
@@ -25,7 +24,7 @@ Sentry.init({
 	// for finer control
 	tracesSampleRate: 1.0,
 	integrations: [new Tracing.Integrations.Mongo()],
-	environment: process.env.ENV,
+	environment: process.env.SENTRY_ENV,
 });
 
 const getTransaction = Sentry.startTransaction({

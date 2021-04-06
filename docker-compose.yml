@@ -17,7 +17,6 @@ services:
     volumes:
       - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - ./mongo/data:/data/db
-
   backend:
     container_name: 'bot_backend'
     hostname: 'backend'
@@ -27,8 +26,21 @@ services:
     depends_on:
       - db
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
+      IMGUR_CLIENT_SECRET: ${IMGUR_CLIENT_SECRET}
+      IMGUR_REFRESH_TOKEN: ${IMGUR_REFRESH_TOKEN}
+      IMGUR_ACCESS_TOKEN: ${IMGUR_ACCESS_TOKEN}
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_MAIL: ${SENTRY_MAIL}
+      SENTRY_ENV: ${SENTRY_ENV}
     ports:
       - 8081:8081
+    env_file:
+      - .env
     volumes:
       - .:/home/node/backend
 
@@ -41,6 +53,16 @@ services:
     depends_on:
       - backend
     restart: always
+    environment:
+      CONSUMER_KEY: ${CONSUMER_KEY}
+      CONSUMER_SECRET: ${CONSUMER_SECRET}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_MAIL: ${SENTRY_MAIL}
+      SENTRY_ENV: ${SENTRY_ENV}
+    env_file:
+      - .env
     ports:
       - 8080:8080
     volumes:
