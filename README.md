@@ -11,11 +11,12 @@
   - Click "Create an app"
   - Fill out the forms with the needed information
 - You will also need access to the Imgur API, to get access you can follow [this](https://apidocs.imgur.com/#intro) guide
-- You also have to create a [Sentry](https://sentry.io/) Project. (If you don't need it you have to uninstall the `@sentry/node` package in the bot **and** backend directory, you also have to uninstall the `@sentry/tracing` package in the backend directory. Then you have to remove the code related to Sentry)
+- You also have the option to use [Sentry](https://sentry.io/).
+  - To use it you have to create a Sentry Project and fill in the needed information in the `.env` file.
 - A `.env` file in the project root
   - Copy the example.env, rename it to **.env** and fill in the needed information.
-- A `config.js` file in the bot **and** backend directory
-  - Copy the config.example.js and rename it to **config.ts**, set the values as you wish.
+- A `config.ts` file in the bot **and** backend directory
+  - Copy the config.example.ts and rename it to **config.ts**, set the values as you wish.
 
 ## Installation
 

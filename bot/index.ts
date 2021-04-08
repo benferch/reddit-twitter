@@ -15,17 +15,19 @@ const SECRET = {
 };
 
 Sentry.init({
-	dsn: process.env.SENTRY_DSN,
+	dsn: process.env.SENTRY_DSN_BOT ? process.env.SENTRY_DSN_BOT : '',
 
 	// We recommend adjusting this value in production, or using tracesSampler
 	// for finer control
 	tracesSampleRate: 1.0,
-	environment: process.env.SENTRY_ENV,
+	environment: process.env.SENTRY_ENV ? process.env.SENTRY_ENV : '',
 });
 
 sharp.cache(false);
 
-Sentry.setUser({ email: process.env.SENTRY_MAIL });
+Sentry.setUser({
+	email: process.env.SENTRY_MAIL ? process.env.SENTRY_MAIL : '',
+});
 
 const transaction = Sentry.startTransaction({
 	op: 'tweet',

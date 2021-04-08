@@ -18,13 +18,13 @@ const app = express();
 const port = 8081;
 
 Sentry.init({
-	dsn: process.env.SENTRY_DSN,
+	dsn: process.env.SENTRY_DSN_BACKEND ? process.env.SENTRY_DSN_BACKEND : '',
 
 	// We recommend adjusting this value in production, or using tracesSampler
 	// for finer control
 	tracesSampleRate: 1.0,
 	integrations: [new Tracing.Integrations.Mongo()],
-	environment: process.env.SENTRY_ENV,
+	environment: process.env.SENTRY_ENV ? process.env.SENTRY_ENV : '',
 });
 
 const getTransaction = Sentry.startTransaction({
@@ -37,7 +37,9 @@ const delTransaction = Sentry.startTransaction({
 	name: 'Delete posted posts from database which are older than 24 hours',
 });
 
-Sentry.setUser({ email: process.env.SENTRY_MAIL });
+Sentry.setUser({
+	email: process.env.SENTRY_MAIL ? process.env.SENTRY_MAIL : '',
+});
 
 Sentry.configureScope((scope) => {
 	scope.setSpan(getTransaction);
