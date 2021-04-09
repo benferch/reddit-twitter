@@ -68,6 +68,7 @@ const PostSchema = new mongoose.Schema(
 		upvotes: Number,
 		imageUrl: String,
 		postUrl: String,
+		timeCreated: Date,
 		timeAdded: Date,
 		posted: Boolean,
 	},
@@ -90,6 +91,7 @@ function getReddit() {
 							id: String;
 							title: String;
 							author: String;
+							created: number;
 							selftext: String;
 							ups: Number;
 							url: String;
@@ -150,31 +152,79 @@ function getReddit() {
 								el.data.url.endsWith('.jpg') ||
 								el.data.url.endsWith('.gif')
 							) {
-								const Post = new PostModel({
+								const data = {
 									id: el.data.id,
 									title: title,
 									author: el.data.author,
 									upvotes: el.data.ups,
 									imageUrl: imageUrl,
 									postUrl: `https://redd.it/${el.data.id}`,
+									timeCreated: new Date(el.data.created * 1000),
 									timeAdded: Date.now(),
 									posted: false,
-								});
-								PostModel.find({ id: el.data.id }, function (err: Error, docs) {
-									if (err) {
-										console.error(err);
-									} else {
-										if (!docs.length) {
-											Post.save().then(() => {
-												console.info(`Posted post with id ${el.data.id}.`);
-											});
-										} else {
-											console.error(
-												`Post with id ${el.data.id} already exists.`
-											);
-										}
+								};
+								if (config.minUpvotes) {
+									if (data.upvotes >= config.amountUpvotes) {
+										PostModel.findOneAndUpdate(
+											{ id: data.id },
+											data,
+											{
+												upsert: true,
+											},
+											function (err) {
+												if (err) {
+													throw new Error(err);
+												} else {
+													console.info(
+														`Posted or Updated post with id ${el.data.id}.`
+													);
+												}
+											}
+										);
 									}
-								});
+								} else {
+									PostModel.findOneAndUpdate(
+										{ id: data.id },
+										data,
+										{
+											upsert: true,
+										},
+										function (err) {
+											if (err) {
+												throw new Error(err);
+											} else {
+												console.info(
+													`Posted or Updated post with id ${el.data.id}.`
+												);
+											}
+										}
+									);
+								}
+								// const Post = new PostModel({
+								// 	id: el.data.id,
+								// 	title: title,
+								// 	author: el.data.author,
+								// 	upvotes: el.data.ups,
+								// 	imageUrl: imageUrl,
+								// 	postUrl: `https://redd.it/${el.data.id}`,
+								// 	timeAdded: Date.now(),
+								// 	posted: false,
+								// });
+								// PostModel.find({ id: el.data.id }, function (err: Error, docs) {
+								// 	if (err) {
+								// 		console.error(err);
+								// 	} else {
+								// 		if (!docs.length) {
+								// 			Post.save().then(() => {
+								// 				console.info(`Posted post with id ${el.data.id}.`);
+								// 			});
+								// 		} else {
+								// 			console.error(
+								// 				`Post with id ${el.data.id} already exists.`
+								// 			);
+								// 		}
+								// 	}
+								// });
 							}
 						}
 					}
@@ -196,7 +246,7 @@ function deletePosted() {
 			`Next time deleting posts: ${timestamp(config.deleteInterval)}.`
 		);
 		PostModel.find(
-			{ posted: true, timeAdded: { $gte: new Date(+0), $lte: yesterday() } },
+			{ posted: true, timeCreated: { $gte: new Date(+0), $lte: yesterday() } },
 			(err: Error, result) => {
 				if (err) {
 					console.error(err);
