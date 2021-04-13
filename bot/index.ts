@@ -113,11 +113,11 @@ function tweet() {
 																			console.error(err);
 																		}
 																	});
-																	unlink('./img/out.png', (err) => {
-																		if (err) {
-																			console.error(err);
-																		}
-																	});
+																	// unlink('./img/out.png', (err) => {
+																	// 	if (err) {
+																	// 		console.error(err);
+																	// 	}
+																	// });
 																});
 															} else {
 																console.error(err);
