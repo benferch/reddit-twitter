@@ -3,7 +3,7 @@ import { timestamp } from './utils/DateFunctions';
 import { createWriteStream, readFileSync, unlink } from 'fs';
 import fetch from 'node-fetch';
 import * as Sentry from '@sentry/node';
-// import sharp from 'sharp';
+import sharp from 'sharp';
 import Twit from 'twit';
 
 const URL = 'http://backend:8081/';
@@ -23,7 +23,7 @@ Sentry.init({
 	environment: process.env.SENTRY_ENV ? process.env.SENTRY_ENV : '',
 });
 
-// sharp.cache(false);
+sharp.cache(false);
 
 Sentry.setUser({
 	email: process.env.SENTRY_MAIL ? process.env.SENTRY_MAIL : '',
@@ -55,84 +55,86 @@ function tweet() {
 					.then((res) => {
 						// Twitter video size: 2min 20 sec && 512mb && max res 1920x1200
 						const dest = createWriteStream('./img/post.png');
-						res.body.pipe(dest).on('close', () => {
-							// sharp('./img/post.png')
-							// 	.resize(1000)
-							// 	.toFile('./img/out.png', (err, info) => {
-							// 		if (err) {
-							// 			console.error(err);
-							// 		} else {
-							// 			console.info(info);
-							let media = readFileSync('./img/post.png', {
-								encoding: 'base64',
-							});
-							Twitter.post(
-								'media/upload',
-								{ media_data: media },
-								(err, data, _res) => {
+						res.body.pipe(dest).on('close', () =>
+							sharp('./img/post.png')
+								.resize(1000)
+								.toFile('./img/out.png', (err, info) => {
 									if (err) {
 										console.error(err);
 									} else {
-										//@ts-ignore This is fine
-										let mediaIdStr = data.media_id_string,
-											meta_params = {
-												media_id: mediaIdStr,
-												alt_text: { text: title },
-											};
+										console.info(info);
+										let media = readFileSync('./img/out.png', {
+											encoding: 'base64',
+										});
 										Twitter.post(
-											'media/metadata/create',
-											meta_params,
-											(err, _data, _res) => {
-												if (!err) {
-													let params = {
-														status: `${title}\nfrom /u/${author}\n\n${postUrl}`,
-														media_ids: [mediaIdStr],
-													};
+											'media/upload',
+											{ media_data: media },
+											(err, data, _res) => {
+												if (err) {
+													console.error(err);
+												} else {
+													//@ts-ignore This is fine
+													let mediaIdStr = data.media_id_string,
+														meta_params = {
+															media_id: mediaIdStr,
+															alt_text: { text: title },
+														};
 													Twitter.post(
-														'statuses/update',
-														params,
+														'media/metadata/create',
+														meta_params,
 														(err, _data, _res) => {
 															if (!err) {
-																console.log(
-																	`Post successfully tweeted\nNext time posting: ${timestamp(
-																		config.interval
-																	)}.`
-																);
-																fetch(`${URL}updatePosts`, {
-																	headers: {
-																		'Content-Type': 'application/json',
-																	},
-																	method: 'POST',
-																	body: JSON.stringify({ id: postId }),
-																}).then((_data) => {
-																	console.log(
-																		`Successfully updated post with id ${postId}`
-																	);
-																	unlink('./img/post.png', (err) => {
-																		if (err) {
+																let params = {
+																	status: `${title}\nfrom /u/${author}\n\n${postUrl}`,
+																	media_ids: [mediaIdStr],
+																};
+																Twitter.post(
+																	'statuses/update',
+																	params,
+																	(err, _data, _res) => {
+																		if (!err) {
+																			console.log(
+																				`Post successfully tweeted\nNext time posting: ${timestamp(
+																					config.interval
+																				)}.`
+																			);
+																			fetch(`${URL}updatePosts`, {
+																				headers: {
+																					'Content-Type': 'application/json',
+																				},
+																				method: 'POST',
+																				body: JSON.stringify({ id: postId }),
+																			}).then((_data) => {
+																				console.log(
+																					`Successfully updated post with id ${postId}`
+																				);
+																				unlink('./img/post.png', (err) => {
+																					if (err) {
+																						console.error(err);
+																					}
+																				});
+																				unlink('./img/out.png', (err) => {
+																					if (err) {
+																						console.error(err);
+																					}
+																				});
+																			});
+																		} else {
 																			console.error(err);
 																		}
-																	});
-																	// unlink('./img/out.png', (err) => {
-																	// 	if (err) {
-																	// 		console.error(err);
-																	// 	}
-																	// });
-																});
+																	}
+																);
 															} else {
 																console.error(err);
 															}
 														}
 													);
-												} else {
-													console.error(err);
 												}
 											}
 										);
 									}
-								}
-							);
-						});
+								})
+						);
 					})
 					.catch((err) => {
 						console.error(err);
