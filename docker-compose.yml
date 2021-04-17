@@ -48,7 +48,7 @@ services:
     container_name: 'bot_bot'
     hostname: 'bot'
     image: 'node:14'
-    command: sh -c 'apt-get update && apt-get install -y netcat && ./wait-for backend:8081 -- echo "Backend is running" && yarn workspace bot start'
+    command: 'yarn workspace bot start'
     working_dir: /home/node/bot
     depends_on:
       - backend
