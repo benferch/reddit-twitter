@@ -71,6 +71,8 @@ const PostSchema = new mongoose.Schema(
 		timeCreated: Date,
 		timeAdded: Date,
 		posted: Boolean,
+		error: Boolean,
+		errorMsg: String,
 	},
 	{ versionKey: false }
 );
@@ -162,6 +164,7 @@ function getReddit() {
 									timeAdded: Date.now(),
 									timeCreated: new Date(el.data.created * 1000),
 									posted: false,
+									error: false,
 								});
 								if (config.minUpvotes) {
 									if (el.data.ups >= config.amountUpvotes) {
@@ -307,6 +310,17 @@ app.post('/updatePosts', (req: express.Request, res: express.Response) => {
 		PostModel.updateOne({ id: req.body.id }, { posted: true }).then(() =>
 			res.status(200).send(`Updated post with id ${req.body.id}.`)
 		);
+	}
+});
+
+app.post('/updateError', (req: express.Request, res: express.Response) => {
+	if (!req.body.id) {
+		res.status(400).send('No id given');
+	} else {
+		PostModel.updateOne(
+			{ id: req.body.id },
+			{ errorMsg: req.body.errorMsg, posted: true, error: true }
+		).then(() => res.status(200).send(`Updated post with id ${req.body.id}.`));
 	}
 });
 

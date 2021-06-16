@@ -60,7 +60,17 @@ function tweet() {
 								.resize(1000)
 								.toFile('./img/out.png', (err, info) => {
 									if (err) {
-										console.error(err);
+										fetch(`${URL}updateError`, {
+											headers: {
+												'Content-Type': 'application/json',
+											},
+											method: 'POST',
+											body: JSON.stringify({
+												id: postId,
+												errorMsg: err,
+											}),
+										});
+										console.error(`There was an error with post ${postId}`);
 									} else {
 										console.info(info);
 										let media = readFileSync('./img/out.png', {
@@ -71,7 +81,19 @@ function tweet() {
 											{ media_data: media },
 											(err, data, _res) => {
 												if (err) {
-													console.error(err);
+													fetch(`${URL}updateError`, {
+														headers: {
+															'Content-Type': 'application/json',
+														},
+														method: 'POST',
+														body: JSON.stringify({
+															id: postId,
+															errorMsg: err,
+														}),
+													});
+													console.error(
+														`There was an error with post ${postId}`
+													);
 												} else {
 													//@ts-ignore This is fine
 													let mediaIdStr = data.media_id_string,
@@ -120,12 +142,36 @@ function tweet() {
 																				});
 																			});
 																		} else {
-																			console.error(err);
+																			fetch(`${URL}updateError`, {
+																				headers: {
+																					'Content-Type': 'application/json',
+																				},
+																				method: 'POST',
+																				body: JSON.stringify({
+																					id: postId,
+																					errorMsg: err,
+																				}),
+																			});
+																			console.error(
+																				`There was an error with post ${postId}`
+																			);
 																		}
 																	}
 																);
 															} else {
-																console.error(err);
+																fetch(`${URL}updateError`, {
+																	headers: {
+																		'Content-Type': 'application/json',
+																	},
+																	method: 'POST',
+																	body: JSON.stringify({
+																		id: postId,
+																		errorMsg: err,
+																	}),
+																});
+																console.error(
+																	`There was an error with post ${postId}`
+																);
 															}
 														}
 													);
